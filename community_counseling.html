@@ -125,7 +125,7 @@
     </div>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
         <nav class="nav-menu">
             <div class="nav-item">
                 <a href="about.html">서비스 소개</a>
@@ -228,34 +228,43 @@
         </div>
     </main>
 
+    <!-- 여기서부터 통합 마스터 스크립트 (프라이빗 페이지용) -->
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
 
+        // 1. 페이지 접근 권한 즉시 체크 (비로그인 차단)
         if (!loggedInUser) {
             alert('로그인이 필요한 서비스입니다!');
-            location.href = 'login.html';
+            location.replace('login.html');
         } else {
-            authMenu.innerHTML = `
-                <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
-                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-            `;
+            // 2. 로그인 성공 시 회원 정보 표시
+            if (authMenu) {
+                authMenu.innerHTML = `
+                    <span>${loggedInUser.name} 회원님</span>
+                    <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
+                    <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
+                `;
+            }
         }
 
+        // 로그아웃 함수
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
             location.href = 'index.html';
         }
 
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+        // 3. 네비게이션 링크 이동 시 추가 보안 체크
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
+
+                if (!loggedInUser) {
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
+                    if (!isPublic) {
                         e.preventDefault();
                         alert('로그인이 필요한 서비스입니다!');
                         location.href = 'login.html';
