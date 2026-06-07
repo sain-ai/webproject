@@ -146,7 +146,7 @@
                             <div class="feature-icon">📄</div>
                             <div class="feature-text">
                                 <h4>PDF 문서 검토</h4>
-                                <p>전자 계약서 파일의 독소 조항을 찾아냅니다.</p>
+                                <p>전자 계약서 파일의 독소 조항 찾아냅니다.</p>
                             </div>
                         </a>
                         <a href="risk_check.html" class="feature-item">
@@ -279,31 +279,28 @@
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
-
+        
         if (loggedInUser && authMenu) {
             authMenu.innerHTML = `
                 <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login" style="cursor:pointer;">로그아웃</a>
+                <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
                 <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
             `;
         }
-
+        
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
-            location.reload();
+            location.href = 'index.html';
         }
-
         
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:')) return;
-
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
+                
                 if (!loggedInUser) {
-                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html'];
-                    
-                    
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
                     
                     if (!isPublic) {
