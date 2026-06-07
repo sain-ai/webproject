@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>알바케어 - 자주 묻는 알바 질문</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            color: #1a1a2e; 
+            background: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #cbd5e1, #f8fafc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .bg-elements { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .floating-item { position: absolute; font-weight: 900; color: #cbd5e1; opacity: 0.4; user-select: none; }
+        .item-A { font-size: 280px; top: 10%; left: 2%; animation: float 8s ease-in-out infinite; }
+        .item-b { font-size: 220px; bottom: 10%; right: 2%; animation: float 10s ease-in-out infinite reverse; }
+        @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(5deg); } 100% { transform: translateY(0) rotate(0deg); } }
+
+        header { 
+            display: flex; justify-content: space-between; align-items: center; padding: 0 50px; 
+            background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #f0f0f0; position: fixed; 
+            width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); height: 80px;
+        }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
+        .nav-menu { display: flex; height: 80px; }
+        .nav-item { position: relative; display: flex; align-items: center; margin: 0 15px; cursor: pointer; }
+        .nav-item > a { text-decoration: none; color: #4a5568; font-weight: 600; font-size: 16px; padding: 30px 5px; transition: all 0.3s; white-space: nowrap; }
+        .nav-item:hover > a { color: #10b981; }
+
+        .dropdown { 
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%) translateY(10px); 
+            background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); opacity: 0; visibility: hidden; 
+            transition: all 0.3s ease; display: flex; padding: 25px; z-index: 999; 
+        }
+        .nav-item:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        
+        .mega-menu { width: 650px; gap: 30px; }
+        .mega-left { flex: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .mega-right { flex: 1.2; border-left: 1px solid #e2e8f0; padding-left: 20px; }
+        
+        .feature-item { display: flex; align-items: flex-start; gap: 12px; text-decoration: none; color: inherit; padding: 10px; border-radius: 8px; transition: background 0.2s; }
+        .feature-item:hover { background-color: #f8fafc; }
+        .feature-icon { font-size: 24px; background: #e6fffa; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+        .feature-text h4 { margin: 0 0 4px 0; font-size: 15px; color: #2d3748; font-weight: bold; }
+        .feature-text p { margin: 0; font-size: 12px; color: #718096; line-height: 1.4; word-break: keep-all; }
+
+        .promo-box { 
+            background-color: #1a365d; color: white; padding: 20px; border-radius: 8px; 
+            text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;
+        }
+        .promo-box h4 { margin: 0 0 10px 0; font-size: 16px; color: #68d391; font-weight: bold; }
+        .promo-box p { font-size: 13px; margin: 0 0 15px 0; opacity: 0.9; line-height: 1.5; word-break: keep-all; }
+        .promo-btn { display: inline-block; background: white; color: #1a365d; padding: 8px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; }
+
+        .simple-list { display: flex; flex-direction: column; gap: 10px; width: 180px; }
+        .simple-list a { text-decoration: none; color: #4a5568; font-size: 14px; padding: 8px; border-radius: 4px; transition: background 0.2s; white-space: nowrap; }
+        .simple-list a:hover { background-color: #f0fdf4; color: #10b981; font-weight: bold; }
+
+        .auth-menu { display: flex; align-items: center; white-space: nowrap; }
+        .auth-menu span { font-size: 14px; font-weight: bold; color: #1a365d; margin-right: 15px; }
+        .btn-login { text-decoration: none; color: #4a5568; font-size: 14px; font-weight: bold; margin-right: 15px; transition: color 0.3s; cursor: pointer; }
+        .btn-login:hover { color: #10b981; }
+        .btn-signup { background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.3s; cursor: pointer; }
+        .btn-signup:hover { background-color: #bbf7d0; color: #1a202c; }
+
+        .faq-wrapper { max-width: 900px; margin: 150px auto 100px; padding: 0 20px; }
+        .faq-title { text-align: center; margin-bottom: 50px; }
+        .faq-title h1 { font-size: 32px; font-weight: 800; color: #1a1a2e; }
+
+        .faq-container { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); border-radius: 24px; padding: 30px; border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .faq-item { border-bottom: 1px solid #e2e8f0; }
+        .faq-item:last-child { border-bottom: none; }
+        
+        .faq-question { padding: 25px 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .faq-question h3 { font-size: 18px; font-weight: 700; color: #2d3748; transition: 0.3s; line-height: 1.4; }
+        .faq-icon { font-size: 18px; color: #cbd5e0; transition: 0.3s; flex-shrink: 0; }
+
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding: 0 10px; }
+        .faq-answer p { font-size: 15px; color: #4a5568; line-height: 1.8; padding-bottom: 25px; }
+
+        .faq-item.active .faq-answer { max-height: 400px; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); color: #10b981; }
+        .faq-item.active h3 { color: #10b981; }
+
+        @media (max-width: 1150px) {
+            header { padding: 0 20px; }
+            .nav-item { margin: 0 5px; }
+            .nav-item > a { font-size: 14px; }
+            .mega-menu { width: 620px; gap: 15px; padding: 20px; }
+            .mega-right { flex: 1; }
+        }
+
+        @media (max-width: 850px) {
+            .faq-wrapper { margin-top: 120px; }
+            .faq-title h1 { font-size: 28px; }
+        }
+
+        @media (max-width: 650px) {
+            .nav-menu { display: none; }
+            .faq-container { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-elements">
+        <div class="floating-item item-A">A</div>
+        <div class="floating-item item-b">b</div>
+    </div>
+
+    <header>
+        <a href="index.html" class="logo">AlbaCare"</a>
+        <nav class="nav-menu">
+            <div class="nav-item">
+                <a href="about.html">서비스 소개</a>
+                <div class="dropdown"><div class="simple-list"><a href="about.html">알바케어란?</a><a href="features.html">주요 기능 안내</a><a href="reviews.html">이용 후기</a></div></div>
+            </div>
+            
+            <div class="nav-item">
+                <a href="#">AI 계약서 분석</a>
+                <div class="dropdown mega-menu">
+                    <div class="mega-left">
+                        <a href="photo_review.html" class="feature-item"><div class="feature-icon">📸</div><div class="feature-text"><h4>사진으로 검토</h4><p>스마트폰 사진을 3초 만에 분석합니다.</p></div></a>
+                        <a href="pdf_review.html" class="feature-item"><div class="feature-icon">📄</div><div class="feature-text"><h4>PDF 문서 검토</h4><p>전자 계약서 파일의 독소 조항을 찾아냅니다.</p></div></a>
+                        <a href="risk_check.html" class="feature-item"><div class="feature-icon">⚠️</div><div class="feature-text"><h4>위험 조항 체크</h4><p>최저임금 위반 여부를 계산해 드립니다.</p></div></a>
+                        <a href="summary.html" class="feature-item"><div class="feature-icon">✨</div><div class="feature-text"><h4>계약서 요약</h4><p>어려운 법률 용어를 쉬운 말로 요약해 드립니다.</p></div></a>
+                    </div>
+                    <div class="mega-right">
+                        <div class="promo-box">
+                            <h4>첫 달 무료 이벤트!</h4>
+                            <p>지금 가입하고 AI 에이전트의 꼼꼼한 법률 검토를 받아보세요.</p>
+                            <a href="payment.html" class="promo-btn">혜택 받기 👉</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-item">
+                <a href="chat.html" style="color: #10b981; font-weight: bold;">AI법률 상담 채팅</a>
+                <div class="dropdown">
+                    <div class="simple-list">
+                        <a href="chat.html">실시간 AI 상담 시작</a>
+                        <a href="faq.html" style="color: #10b981; font-weight: bold;">자주 묻는 알바 질문</a>
+                        <a href="history.html">나의 상담 내역</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <a href="#">판례·사례 검색</a>
+                <div class="dropdown"><div class="simple-list"><a href="wage_remedy.html">임금체불 구제 사례</a><a href="unfair_dismissal_cases.html">부당해고 판례 찾기</a><a href="labor_law_summary.html">노동법 핵심 요약집</a></div></div>
+            </div>
+
+            <div class="nav-item">
+                <a href="#">커뮤니티</a>
+                <div class="dropdown"><div class="simple-list"><a href="community_tips.html">알바생 꿀팁 게시판</a><a href="expert_qna.html">노무사 Q&A</a><a href="community_counseling.html">고민 상담소</a></div></div>
+            </div>
+
+            <div class="nav-item"><a href="support.html">고객지원</a></div>
+        </nav>
+        <div class="auth-menu"><a href="login.html" class="btn-login">로그인</a><a href="payment.html" class="btn-signup">한달 무료 체험!</a></div>
+    </header>
+
+    <main class="faq-wrapper">
+        <div class="faq-title">
+            <h1>자주 묻는 알바 질문</h1>
+            <p style="color: #718096; margin-top: 10px;">사장님께 물어보기 어려운 질문들, 알바케어가 답변해 드립니다.</p>
+        </div>
+
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question"><h3>Q. 근로계약서 작성, 반드시 해야 하나요?</h3><span class="faq-icon">▼</span></div>
+                <div class="faq-answer"><p>네, 필수입니다! 근로기준법에 따라 고용주는 단 하루를 일하더라도 근로계약서를 작성하고 근로자에게 교부해야 합니다. 작성하지 않을 경우 사업주에게 500만 원 이하의 벌금이 부과될 수 있습니다.</p></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><h3>Q. 최저임금보다 적게 받는 수습기간이 있나요?</h3><span class="faq-icon">▼</span></div>
+                <div class="faq-answer"><p>1년 이상의 근로계약을 맺은 경우에만 수습기간(최대 3개월) 동안 최저임금의 90%를 지급할 수 있습니다. 단, 단순 노무직은 수습 감액이 불가능하니 꼭 확인하세요!</p></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><h3>Q. 주휴수당은 누구나 받을 수 있나요?</h3><span class="faq-icon">▼</span></div>
+                <div class="faq-answer"><p>일주일 소정 근로시간이 15시간 이상이고, 계약된 근로일을 빠짐없이 출근(개근)했다면 누구나 받을 수 있습니다. 5인 미만 사업장이라도 주휴수당은 필수 지급 대상입니다.</p></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><h3>Q. 사장님이 갑자기 그만두라고 합니다. 어떡하죠?</h3><span class="faq-icon">▼</span></div>
+                <div class="faq-answer"><p>사장님은 최소 30일 전에 해고 예고를 해야 합니다. 예고 없이 즉시 해고할 경우 30일분 이상의 통상임금(해고예고수당)을 지급받을 권리가 있습니다.</p></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><h3>Q. 그만둘 때는 며칠 전에 말해야 하나요?</h3><span class="faq-icon">▼</span></div>
+                <div class="faq-answer"><p>법적 고정 기간은 없으나 관례상 약 2주~1개월 전에 말하는 것이 좋습니다. 갑작스러운 퇴사로 사업장에 피해를 주면 분쟁이 생길 수 있으니 미리 조율하는 것이 베스트입니다!</p></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                document.querySelectorAll('.faq-item').forEach(other => { if(other !== item) other.classList.remove('active'); });
+                item.classList.toggle('active');
+            });
+        });
+
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        const authMenu = document.querySelector('.auth-menu');
+
+        if (loggedInUser && authMenu) {
+            authMenu.innerHTML = `
+                <span>${loggedInUser.name} 회원님</span>
+                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
+                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
+            `;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('loggedInUser');
+            alert('로그아웃 되었습니다.');
+            location.href = 'index.html';
+        }
+
+        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetHref = this.getAttribute('href');
+                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                    const isPublic = publicPages.some(page => targetHref.includes(page));
+                    if (!loggedInUser && !isPublic) {
+                        e.preventDefault();
+                        alert('로그인이 필요한 서비스입니다!');
+                        location.href = 'login.html';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

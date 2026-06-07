@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>알바케어 - 회원가입</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #cbd5e1, #f8fafc); 
+            background-size: 400% 400%; 
+            animation: gradientBG 15s ease infinite; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0 50px; 
+            background-color: rgba(255, 255, 255, 0.95); 
+            height: 80px; 
+            backdrop-filter: blur(10px); 
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
+
+        .auth-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding-top: 50px; }
+        .auth-card { 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(20px); 
+            padding: 40px; 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 450px; 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #4a5568; }
+        .input-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 2px solid #e2e8f0; 
+            outline: none; 
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        .input-group input:focus { border-color: #10b981; background: white; }
+
+        .btn-auth { 
+            width: 100%; 
+            padding: 15px; 
+            background: #10b981; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 10px;
+        }
+        .btn-auth:hover { background: #059669; transform: translateY(-2px); }
+
+        .auth-footer { margin-top: 20px; font-size: 14px; color: #718096; }
+        .auth-footer a { color: #1a365d; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">AlbaCare"</a>
+    </header>
+
+    <main class="auth-wrapper">
+        <div class="auth-card">
+            <h1 style="margin-bottom:10px; font-weight: 800; color: #1a1a2e;">회원가입</h1>
+            <p style="color:#718096; margin-bottom:30px;">알바케어와 함께 권익을 보호하세요.</p>
+            
+            <form id="signupForm">
+                <div class="input-group">
+                    <label>이름</label>
+                    <input type="text" id="name" placeholder="홍길동" required>
+                </div>
+                <div class="input-group">
+                    <label>이메일</label>
+                    <input type="email" id="email" placeholder="example@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="password" placeholder="8자 이상 입력" required>
+                </div>
+                <button type="submit" class="btn-auth">가입하기</button>
+            </form>
+
+            <div class="auth-footer">
+                이미 계정이 있으신가요? <a href="login.html">로그인</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.some(u => u.email === email)) {
+                alert('이미 가입된 이메일입니다.');
+                return;
+            }
+
+            users.push({ name, email, password });
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            alert('회원가입이 완료되었습니다! 로그인해 주세요.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
