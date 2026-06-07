@@ -77,7 +77,7 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
         <nav class="nav-menu">
             <div class="nav-item">
                 <a href="about.html" style="color: #10b981;">서비스 소개</a>
@@ -239,6 +239,7 @@
         <a href="chat.html" class="btn-primary">AI채팅상담 시작하기</a>
     </section>
 
+    <!-- 여기서부터 통합 마스터 스크립트 (퍼블릭 페이지용) -->
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
@@ -246,7 +247,7 @@
         if (loggedInUser && authMenu) {
             authMenu.innerHTML = `
                 <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
+                <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
                 <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
             `;
         }
@@ -257,13 +258,16 @@
             location.href = 'index.html';
         }
 
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
+
+                if (!loggedInUser) {
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
+                    
+                    if (!isPublic) {
                         e.preventDefault();
                         alert('로그인이 필요한 서비스입니다!');
                         location.href = 'login.html';
@@ -272,6 +276,7 @@
             });
         });
 
+        // 스크롤 애니메이션
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) {
