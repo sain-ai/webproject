@@ -122,7 +122,7 @@
     </div>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
         <nav class="nav-menu">
             <div class="nav-item">
                 <a href="about.html">서비스 소개</a>
@@ -213,31 +213,35 @@
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
-
+        
         if (!loggedInUser) {
             alert('로그인이 필요한 서비스입니다!');
-            location.href = 'login.html';
+            location.replace('login.html');
         } else {
-            authMenu.innerHTML = `
-                <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
-                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-            `;
+            if (authMenu) {
+                authMenu.innerHTML = `
+                    <span>${loggedInUser.name} 회원님</span>
+                    <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
+                    <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
+                `;
+            }
         }
-
+        
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
             location.href = 'index.html';
         }
-
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+        
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
+                
+                if (!loggedInUser) {
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
+                    if (!isPublic) {
                         e.preventDefault();
                         alert('로그인이 필요한 서비스입니다!');
                         location.href = 'login.html';
