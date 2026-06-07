@@ -120,7 +120,7 @@
     </div>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
         <nav class="nav-menu">
             <div class="nav-item">
                 <a href="about.html">서비스 소개</a>
@@ -241,31 +241,43 @@
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
 
+        // 1. 페이지 접근 권한 즉시 체크 (비로그인 차단)
         if (!loggedInUser) {
             alert('로그인이 필요한 서비스입니다!');
-            location.href = 'login.html';
+            location.replace('login.html');
         } else {
-            authMenu.innerHTML = `
-                <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
-                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-            `;
-            document.getElementById('chatMainTitle').innerHTML = `<span class="status-dot"></span> ${loggedInUser.name}님을 위한 AI 상담실`;
+            // 2. 로그인 성공 시 회원 정보 표시
+            if (authMenu) {
+                authMenu.innerHTML = `
+                    <span>${loggedInUser.name} 회원님</span>
+                    <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
+                    <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
+                `;
+            }
+            // 3. 채팅창 타이틀에 유저 이름 연동
+            const chatTitle = document.getElementById('chatMainTitle');
+            if (chatTitle) {
+                chatTitle.innerHTML = `<span class="status-dot"></span> ${loggedInUser.name}님을 위한 AI 상담실`;
+            }
         }
 
+        // 로그아웃 함수
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
             location.href = 'index.html';
         }
 
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+        // 4. 네비게이션 링크 이동 시 추가 보안 체크
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
+
+                if (!loggedInUser) {
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
+                    if (!isPublic) {
                         e.preventDefault();
                         alert('로그인이 필요한 서비스입니다!');
                         location.href = 'login.html';
@@ -274,19 +286,23 @@
             });
         });
 
+        // 5. 채팅 기능 로직
         const chatWindow = document.getElementById('chatWindow');
         const userInput = document.getElementById('userInput');
 
         async function sendMessage() {
             const message = userInput.value.trim();
             if (message === "") return;
+            
             appendMessage('user', message);
             userInput.value = "";
+            
             const loadingBubble = document.createElement('div');
             loadingBubble.className = 'message ai-message';
             loadingBubble.innerHTML = '<div class="spinner"></div> AI 노무사가 생각 중입니다...';
             chatWindow.appendChild(loadingBubble);
             chatWindow.scrollTop = chatWindow.scrollHeight;
+            
             setTimeout(() => {
                 loadingBubble.innerHTML = "질문하신 '" + message + "'에 대해 답변 드립니다. (Replit 서버 비가동중입니다.) 서버 가동 후, 실제 법률 데이터를 기반으로 정교한 상담이 가능합니다!";
                 chatWindow.scrollTop = chatWindow.scrollHeight;
