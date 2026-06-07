@@ -279,28 +279,42 @@
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
-
+    
+        // 1. 로그인 상태에 따라 상단 메뉴 변경
         if (loggedInUser && authMenu) {
             authMenu.innerHTML = `
                 <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
+                <a onclick="handleLogout()" class="btn-login" style="cursor:pointer;">로그아웃</a>
                 <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
             `;
         }
-
+    
+        // 로그아웃 함수
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
             location.reload();
         }
-
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+    
+        // 2. 로그인 권한 체크 (공백이나 주소 경로 에러 방지 고정)
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
-                    const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
+                
+                // 빈 링크거나 이동하지 않는 링크는 패스
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:')) {
+                    return;
+                }
+    
+                // 로그인이 안 되어 있을 때만 체크
+                if (!loggedInUser) {
+                    // 무조건 허용할 페이지 목록 (정확히 매칭되도록 수정)
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+                    
+                    // 현재 누른 링크가 허용 목록에 포함되어 있는지 확인
+                    const isPublic = publicPages.some(page => targetHref.endsWith(page) || targetHref === page);
+                    
+                    if (!isPublic) {
                         e.preventDefault();
                         alert('로그인이 필요한 서비스입니다!');
                         location.href = 'login.html';
