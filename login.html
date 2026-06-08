@@ -15,22 +15,18 @@
             overflow: hidden;
             display: flex; flex-direction: column;
         }
-
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
         .bg-elements { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
         .floating-item { position: absolute; font-weight: 900; color: #cbd5e1; opacity: 0.4; user-select: none; }
         .item-A { font-size: 280px; top: 10%; left: 2%; animation: float 8s ease-in-out infinite; }
         .item-b { font-size: 220px; bottom: 10%; right: 2%; animation: float 10s ease-in-out infinite reverse; }
         @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(5deg); } 100% { transform: translateY(0) rotate(0deg); } }
-
         header { 
             display: flex; justify-content: space-between; align-items: center; padding: 0 50px; 
             background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #f0f0f0; position: fixed; 
             width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); height: 80px;
         }
         .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
-
         .auth-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding-top: 80px; }
         .auth-card { 
             background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); 
@@ -40,7 +36,6 @@
         }
         .auth-card h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #1a1a2e; }
         .auth-card p { color: #718096; margin-bottom: 35px; }
-
         .input-group { text-align: left; margin-bottom: 20px; }
         .input-group label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #4a5568; }
         .input-group input { 
@@ -48,14 +43,12 @@
             font-size: 16px; outline: none; transition: 0.3s;
         }
         .input-group input:focus { border-color: #10b981; background: white; }
-
         .btn-auth { 
             width: 100%; padding: 16px; background: #1a365d; color: white; border: none; 
             border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; 
             margin-top: 10px;
         }
         .btn-auth:hover { background: #2c5282; transform: translateY(-2px); }
-
         .auth-footer { margin-top: 25px; font-size: 14px; color: #718096; }
         .auth-footer a { color: #10b981; text-decoration: none; font-weight: bold; }
     </style>
@@ -65,16 +58,13 @@
         <div class="floating-item item-A">A</div>
         <div class="floating-item item-b">b</div>
     </div>
-
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
     </header>
-
     <main class="auth-wrapper">
         <div class="auth-card">
             <h1>환영합니다!</h1>
             <p>로그인하여 알바케어 서비스를 이용하세요.</p>
-            
             <form id="loginForm">
                 <div class="input-group">
                     <label>이메일 주소</label>
@@ -86,26 +76,22 @@
                 </div>
                 <button type="submit" class="btn-auth">로그인</button>
             </form>
-
             <div class="auth-footer">
                 아직 계정이 없으신가요? <a href="signup.html">회원가입</a>
             </div>
         </div>
     </main>
-
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const user = users.find(u => u.email === email && u.password === password);
-
             if (user) {
                 alert(user.name + '님, 반갑습니다! 성공적으로 로그인되었습니다.');
                 localStorage.setItem('loggedInUser', JSON.stringify(user));
-                window.location.href = 'history.html';
+                window.location.href = 'index.html';
             } else {
                 alert('등록되지 않은 이메일이거나 비밀번호가 틀렸습니다.');
             }
