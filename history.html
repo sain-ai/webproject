@@ -96,16 +96,30 @@
         }
         .history-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.9); }
 
-        .card-left { display: flex; align-items: center; gap: 25px; }
+        .card-left { display: flex; align-items: center; gap: 25px; min-width: 0; flex: 1; }
         .card-icon { width: 60px; height: 60px; background: #e6fffa; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
-        .card-text h3 { font-size: 20px; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
-        .card-text p { font-size: 14px; color: #718096; line-height: 1.5; }
+        
+        /* 🛠️ 레이아웃을 해치지 않고 2줄 높이에 꽉 들어차도록 설계된 핵심 스타일 */
+        .card-text { min-width: 0; flex: 1; }
+        .card-text h3 { font-size: 20px; font-weight: 700; color: #2d3748; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .card-text p { 
+            font-size: 14px; 
+            color: #718096; 
+            line-height: 1.5;
+            max-height: 4.2em;      /* 1.5라인헤이트 * 2줄 = 3.0em에 여유 버퍼링 포함 높이 강제 통제 */
+            overflow: hidden;       /* 박스 밖으로 튀어나오는 데이터 강제 숨김 */
+            display: -webkit-box;   /* 웹킷 멀티라인 프레임 캡슐화 */
+            -webkit-line-clamp: 2;  /* 대형 스크린 왜곡 현상 등 방지용 라인 수 고정 */
+            -webkit-box-orient: vertical;
+            text-overflow: clip;    /* 🌟 글자 중간에 '...'이 절대 안 생기게 차단 */
+        }
 
-        .card-right { text-align: right; flex-shrink: 0; }
+        .card-right { text-align: right; flex-shrink: 0; margin-left: 20px; }
         .card-date { font-size: 14px; color: #a0aec0; margin-top: 0; font-weight: bold; }
 
         @media (max-width: 1100px) { header { padding: 0 20px; } .nav-item { margin: 0 8px; } .nav-item > a { font-size: 14px; } .mega-menu { width: 600px; } }
-        @media (max-width: 850px) { .history-card { flex-direction: column; align-items: flex-start; gap: 20px; } .card-right { text-align: left; width: 100%; border-top: 1px solid #f1f5f9; padding-top: 15px; } .card-text h3 { font-size: 18px; } }
+        @media (max-width: 850px) { .history-card { flex-direction: column; align-items: flex-start; gap: 20px; } .card-right { text-align: left; width: 100%; border-top: 1px solid #f1f5f9; padding-top: 15px; margin-left: 0; } .card-text h3 { font-size: 18px; } }
         @media (max-width: 650px) { .nav-menu { display: none; } .history-title h1 { font-size: 26px; } .card-left { gap: 15px; } .card-icon { width: 50px; height: 50px; font-size: 22px; } }
     </style>
 </head>
@@ -161,11 +175,6 @@
                 <div class="dropdown"><div class="simple-list"><a href="wage_remedy.html">임금체불 구제 사례</a><a href="unfair_dismissal_cases.html">부당해고 판례 찾기</a><a href="labor_law_summary.html">노동법 핵심 요약집</a></div></div>
             </div>
 
-            <div class="nav-item">
-                <a href="#">커뮤니티</a>
-                <div class="dropdown"><div class="simple-list"><a href="community_tips.html">알바생 꿀팁 게시판</a><a href="expert_qna.html">노무사 Q&A</a><a href="community_counseling.html">고민 상담소</a></div></div>
-            </div>
-
             <div class="nav-item"><a href="support.html">고객지원</a></div>
         </nav>
         <div class="auth-menu">
@@ -190,8 +199,7 @@
         const authMenu = document.querySelector('.auth-menu');
         const historyContainer = document.getElementById('historyContainer');
         
-        // 🛑 Render에 배포 완료된 본인의 실제 서비스 도메인 주소로 변경해 주세요!
-        const BACKEND_URL = "https://albacare.onrender.com"; 
+        const BACKEND_URL = "https://webproject-sain.onrender.com"; 
 
         if (!loggedInUser) {
             alert('로그인이 필요한 서비스입니다!');
@@ -204,11 +212,9 @@
                     <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
                 `;
             }
-            // 유저 세션 확인 후 즉시 비동기 내역 fetch 호출
             fetchUserChatHistory(loggedInUser.email);
         }
         
-        // ⚡ 데이터베이스로부터 실시간 상담 기록을 연동하는 로직
         async function fetchUserChatHistory(email) {
             try {
                 const response = await fetch(`${BACKEND_URL}/chat/history?email=${encodeURIComponent(email)}`);
@@ -222,18 +228,17 @@
                     return;
                 }
                 
-                // 기존 스켈레톤 문구 리셋
                 historyContainer.innerHTML = "";
                 
-                // 루프 돌며 데이터 바인딩 작업 (요청하신 대로 상태 필드 삭제 및 날짜 정렬 최적화)
                 history.forEach(item => {
+                    // 🛠️ 프론트 스크립트단에서 강제로 적용되던 잘림 코드(.substring)를 완전히 제거하여 온전한 텍스트 렌더링 주입
                     const cardHTML = `
                         <a href="#" class="history-card">
                             <div class="card-left">
                                 <div class="card-icon">⚖️</div>
                                 <div class="card-text">
                                     <h3>${item.title}</h3>
-                                    <p>${item.reply.substring(0, 75)}...</p> 
+                                    <p>${item.reply}</p> 
                                 </div>
                             </div>
                             <div class="card-right">
@@ -255,24 +260,6 @@
             alert('로그아웃 되었습니다.');
             location.href = 'index.html';
         }
-        
-        // 비로그인 사용자 공통 페이지 접근 통제 스크립트 유지
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const targetHref = this.getAttribute('href');
-                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
-                
-                if (!loggedInUser) {
-                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
-                    const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!isPublic) {
-                        e.preventDefault();
-                        alert('로그인이 필요한 서비스입니다!');
-                        location.href = 'login.html';
-                    }
-                }
-            });
-        });
     </script>
 </body>
 </html>
