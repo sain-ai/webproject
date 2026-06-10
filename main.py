@@ -25,7 +25,7 @@ DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 SQLite 데이터베이스 초기화 로직 (상담 내역 테이블 추가)
+# 💾 SQLite 데이터베이스 초기화 로직
 # ==========================================================
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -39,7 +39,7 @@ def init_db():
             password TEXT NOT NULL
         )
     """)
-    # 2. 상담 내역 저장용 테이블 (한국 시간 기준으로 자동 저장)
+    # 2. 상담 내역 저장용 테이블
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS chat_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -192,15 +192,19 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (유저별 저장 고도화)
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (★오류 완벽 해결 구간★)
 # ==========================================================
 @app.post("/chat")
 def chat_with_labor_attorney(
     request: ChatMessageRequest, 
-    user_email: str = Form(...)  # 👈 어떤 회원의 상담인지 구별하고 저장하기 위해 유저 이메일을 폼 데이터로 함께 받습니다.
+    user_email: str = None  # 👈 Form(...)을 지우고 URL 파라미터로 이메일을 안전하게 받도록 수정했습니다!
 ):
     if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
+
+    # 이메일 주입 여부 예외 검사 규칙
+    if not user_email:
+        raise HTTPException(status_code=422, detail="user_email 파라미터가 누락되었습니다.")
 
     chat_prompt = (
         "너는 대한민국 근로기준법을 완벽하게 숙지한 친절하고 든든한 '알바 전문 AI 노무사'야. "
@@ -233,7 +237,7 @@ def chat_with_labor_attorney(
             
         ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
 
-        # 💾 [데이터베이스 저장] 성공한 대화 내역을 테이블에 기록합니다.
+        # 💾 [데이터베이스 저장] 넘어온 user_email과 대화를 기록합니다.
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
         cursor.execute(
@@ -248,7 +252,7 @@ def chat_with_labor_attorney(
         raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
 
 # ==========================================================
-# 📊 3. 유저별 상담 내역 리스트 가져오기 엔드포인트 (신설)
+# 📊 3. 유저별 상담 내역 리스트 가져오기 엔드포인트
 # ==========================================================
 @app.get("/chat/history")
 def get_user_chat_history(email: str):
@@ -257,7 +261,6 @@ def get_user_chat_history(email: str):
         
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # 최신 상담 내역이 위로 오도록 내림차순(DESC) 정렬로 조회합니다.
     cursor.execute(
         "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
         (email,)
@@ -267,10 +270,7 @@ def get_user_chat_history(email: str):
     
     history_list = []
     for row in rows:
-        # 질문이 너무 길면 첫 자 기준 35자만 잘라서 한줄요약 제목으로 가공합니다.
         summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
-        
-        # 'YYYY-MM-DD HH:MM:SS' 구조에서 'YYYY.MM.DD' 형식으로 날짜 구조를 변경합니다.
         date_formatted = row[2].split(" ")[0].replace("-", ".")
         
         history_list.append({
