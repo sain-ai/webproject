@@ -6,11 +6,12 @@ import sqlite3
 import os
 import requests
 import base64
+import re
 
 app = FastAPI(title="AlbaCare Full Stack Gemini Server")
 
 # ==========================================================
-# 🌐 CORS 설정 (프론트엔드 정적 사이트 통신 허용)
+# 🌐 CORS 설정
 # ==========================================================
 app.add_middleware(
     CORSMiddleware,
@@ -22,16 +23,15 @@ app.add_middleware(
 
 DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 
-# 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
+# 💡 Google AI Studio Gemini API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 안전한 SQLite Connection 관리 에이전트 (with문 전용)
+# 💾 SQLite Connection 관리 에이전트
 # ==========================================================
 @contextmanager
 def get_db():
-    """DB가 잠기거나 커넥션이 열려있지 않도록 자동으로 열고 닫아주는 안전장치입니다."""
-    conn = sqlite3.connect(DB_FILE, timeout=10.0) # 잠금 대기 시간 10초 설정
+    conn = sqlite3.connect(DB_FILE, timeout=10.0)
     try:
         yield conn
     finally:
@@ -43,7 +43,6 @@ def get_db():
 def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
-        # 1. 회원 정보 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +51,6 @@ def init_db():
                 password TEXT NOT NULL
             )
         """)
-        # 2. 상담 내역 저장용 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +80,7 @@ class ChatMessageRequest(BaseModel):
     message: str
 
 # ==========================================================
-# 🚀 기본 라우트 (서버 구동 점검용)
+# 🚀 기본 라우트
 # ==========================================================
 @app.get("/")
 def read_root():
@@ -201,7 +199,7 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (안정성 강화)
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트
 # ==========================================================
 @app.post("/chat")
 def chat_with_labor_attorney(
@@ -245,7 +243,6 @@ def chat_with_labor_attorney(
             
         ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
 
-        # 💾 [안전 장치 적용 DB 저장] with 블록이 끝나면 자동으로 커넥션이 정상 종료됩니다.
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -259,7 +256,7 @@ def chat_with_labor_attorney(
         raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
 
 # ==========================================================
-# 📊 3. 유저별 상담 내역 리스트 가져오기 엔드포인트
+# 📊 3. 유저별 상담 내역 리스트 가져오기 (문장 단위 정제 가공)
 # ==========================================================
 @app.get("/chat/history")
 def get_user_chat_history(email: str):
@@ -277,11 +274,24 @@ def get_user_chat_history(email: str):
     history_list = []
     for row in rows:
         summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
+        
+        # 특수문자 및 마크다운 기호 완전히 제거
+        raw_reply = row[1].replace("\n", " ").replace("*", "").replace("#", "").strip()
+        
+        # 문장 단위 분리 규칙
+        sentences = re.split(r'(?<=[.!?])\s+', raw_reply)
+        
+        # 첫 번째 공감 문구 이후 딱 2문장만 가져와 깔끔히 결합 (말줄임표 완전히 제거)
+        if len(sentences) > 1:
+            solution_summary = " ".join(sentences[1:3]).strip()
+        else:
+            solution_summary = sentences[0]
+
         date_formatted = row[2].split(" ")[0].replace("-", ".")
         
         history_list.append({
             "title": summary_title,
-            "reply": row[1],
+            "reply": solution_summary,  # 👈 임의로 텍스트를 끊어 자르지 않고 온전한 2문장 전달
             "date": date_formatted
         })
         
