@@ -78,7 +78,7 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">AlbaCare</a>
     </header>
 
     <main class="auth-wrapper">
@@ -109,24 +109,36 @@
     </main>
 
     <script>
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            let users = JSON.parse(localStorage.getItem('users') || '[]');
             
-            if (users.some(u => u.email === email)) {
-                alert('이미 가입된 이메일입니다.');
-                return;
-            }
+            const BACKEND_URL = 'https://albacare.onrender.com'; 
 
-            users.push({ name, email, password });
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            alert('회원가입이 완료되었습니다! 로그인해 주세요.');
-            window.location.href = 'login.html';
+            try {
+                const response = await fetch(`${BACKEND_URL}/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('회원가입이 완료되었습니다! 로그인해 주세요.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.detail || '회원가입에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('백엔드 서버 연결에 실패했습니다. Render 서버가 켜져 있는지 확인해 주세요.');
+            }
         });
     </script>
 </body>
