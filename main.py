@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
+from contextlib import contextmanager
 import sqlite3
 import os
 import requests
@@ -25,32 +26,43 @@ DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 SQLite 데이터베이스 초기화 로직
+# 💾 안전한 SQLite Connection 관리 에이전트 (with문 전용)
+# ==========================================================
+@contextmanager
+def get_db():
+    """DB가 잠기거나 커넥션이 열려있지 않도록 자동으로 열고 닫아주는 안전장치입니다."""
+    conn = sqlite3.connect(DB_FILE, timeout=10.0) # 잠금 대기 시간 10초 설정
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+# ==========================================================
+# 💾 데이터베이스 초기화 로직
 # ==========================================================
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    # 1. 회원 정보 테이블
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    """)
-    # 2. 상담 내역 저장용 테이블
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS chat_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_email TEXT NOT NULL,
-            message TEXT NOT NULL,
-            reply TEXT NOT NULL,
-            created_at DATETIME DEFAULT (datetime('now', 'localtime'))
-        )
-    """)
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # 1. 회원 정보 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        """)
+        # 2. 상담 내역 저장용 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS chat_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                message TEXT NOT NULL,
+                reply TEXT NOT NULL,
+                created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+            )
+        """)
+        conn.commit()
 
 init_db()
 
@@ -81,24 +93,21 @@ def read_root():
 # ==========================================================
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(user_data: SignUpRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    try:
-        cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (user_data.name, user_data.email, user_data.password))
-        conn.commit()
-    except sqlite3.IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="이미 가입된 이메일입니다.")
-    finally:
-        conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (user_data.name, user_data.email, user_data.password))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="이미 가입된 이메일입니다.")
     return {"message": "회원가입이 완료되었습니다."}
 
 @app.post("/login")
 def login(credentials: LoginRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT name, email, password FROM users WHERE email = ?", (credentials.email,))
-    user = cursor.fetchone()
-    conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, email, password FROM users WHERE email = ?", (credentials.email,))
+        user = cursor.fetchone()
     if not user or user[2] != credentials.password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이메일 또는 비밀번호가 일치하지 않습니다.")
     return {"message": "로그인 성공", "user": {"name": user[0], "email": user[1]}}
@@ -192,17 +201,16 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (★오류 완벽 해결 구간★)
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (안정성 강화)
 # ==========================================================
 @app.post("/chat")
 def chat_with_labor_attorney(
     request: ChatMessageRequest, 
-    user_email: str = None  # 👈 Form(...)을 지우고 URL 파라미터로 이메일을 안전하게 받도록 수정했습니다!
+    user_email: str = None
 ):
     if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
 
-    # 이메일 주입 여부 예외 검사 규칙
     if not user_email:
         raise HTTPException(status_code=422, detail="user_email 파라미터가 누락되었습니다.")
 
@@ -237,15 +245,14 @@ def chat_with_labor_attorney(
             
         ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
 
-        # 💾 [데이터베이스 저장] 넘어온 user_email과 대화를 기록합니다.
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO chat_history (user_email, message, reply) VALUES (?, ?, ?)",
-            (user_email, request.message, ai_reply)
-        )
-        conn.commit()
-        conn.close()
+        # 💾 [안전 장치 적용 DB 저장] with 블록이 끝나면 자동으로 커넥션이 정상 종료됩니다.
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO chat_history (user_email, message, reply) VALUES (?, ?, ?)",
+                (user_email, request.message, ai_reply)
+            )
+            conn.commit()
 
         return {"reply": ai_reply}
     except Exception as e:
@@ -259,14 +266,13 @@ def get_user_chat_history(email: str):
     if not email:
         raise HTTPException(status_code=400, detail="이메일 정보가 빠졌습니다.")
         
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
-        (email,)
-    )
-    rows = cursor.fetchall()
-    conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
+            (email,)
+        )
+        rows = cursor.fetchall()
     
     history_list = []
     for row in rows:
