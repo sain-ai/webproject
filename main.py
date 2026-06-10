@@ -22,15 +22,15 @@ app.add_middleware(
 DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 
 # 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
-# Render 대시보드의 Environment Variables(환경변수)에 GEMINI_API_KEY로 등록하시면 코드가 가장 안전해집니다.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 SQLite 데이터베이스 초기화 로직
+# 💾 SQLite 데이터베이스 초기화 로직 (상담 내역 테이블 추가)
 # ==========================================================
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    # 1. 회원 정보 테이블
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,21 +39,23 @@ def init_db():
             password TEXT NOT NULL
         )
     """)
+    # 2. 상담 내역 저장용 테이블 (한국 시간 기준으로 자동 저장)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT NOT NULL,
+            message TEXT NOT NULL,
+            reply TEXT NOT NULL,
+            created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+        )
+    """)
     conn.commit()
     conn.close()
 
 init_db()
 
-print("=" * 50)
-if GEMINI_API_KEY:
-    # 보안을 위해 앞의 5글자만 출력해서 확인
-    print(f"[알림] GEMINI_API_KEY 로드 성공! (시작 부분: {GEMINI_API_KEY[:5]}...)")
-else:
-    print("[경고] GEMINI_API_KEY가 존재하지 않거나 None입니다! Render 설정을 확인하세요.")
-print("=" * 50)
-
 # ==========================================================
-# 🔑 회원가입 및 로그인 데이터 모델 규격
+# 🔑 데이터 모델 규격
 # ==========================================================
 class SignUpRequest(BaseModel):
     name: str
@@ -64,19 +66,18 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-# 챗봇 상담용 전용 모델 규격
 class ChatMessageRequest(BaseModel):
     message: str
 
 # ==========================================================
-# 🚀 기본 라우트 (서버 구동 점검용 소크)
+# 🚀 기본 라우트 (서버 구동 점검용)
 # ==========================================================
 @app.get("/")
 def read_root():
     return {"status": "running", "message": "AlbaCare Gemini AI API Server is fully operational!"}
 
 # ==========================================================
-# 🔐 회원관리 엔드포인트 (기존 기능 100% 유지)
+# 🔐 회원관리 엔드포인트
 # ==========================================================
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(user_data: SignUpRequest):
@@ -102,16 +103,14 @@ def login(credentials: LoginRequest):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이메일 또는 비밀번호가 일치하지 않습니다.")
     return {"message": "로그인 성공", "user": {"name": user[0], "email": user[1]}}
 
-
 # ==========================================================
 # 🔍 1. 계약서 이미지 & PDF 분석 API 엔드포인트
 # ==========================================================
 @app.post("/analyze")
 async def analyze_contract(
     file: UploadFile = File(...),
-    task_type: str = Form(...) # 프론트엔드별 요청 분기 키 ('photo_detail', 'risk_check', 'summary')
+    task_type: str = Form(...)
 ):
-    # 확장자 사전 필터링
     file_extension = os.path.splitext(file.filename)[1].lower()
     if file_extension not in ['.jpg', '.jpeg', '.png', '.pdf']:
         raise HTTPException(status_code=400, detail="지원하지 않는 파일 형식입니다. (JPG, PNG, PDF만 가능)")
@@ -119,10 +118,8 @@ async def analyze_contract(
     if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
 
-    # 파일 2진수 바이트 변환 읽기
     file_bytes = await file.read()
     
-    # 🛑 [필터링 규칙] 계약서가 아닌 엉뚱한 이미지 필터링용 공통 가이드라인 선언
     validation_rule = (
         "[경고 - 가장 중요한 절대 규칙]\n"
         "제공된 파일이 '근로계약서' 혹은 '고용계약서'와 관련된 공식 문서가 아니거나, "
@@ -133,7 +130,6 @@ async def analyze_contract(
         "-------------------------------------\n"
     )
 
-    # 기능별 프롬프트 분기 가공
     if task_type == "photo_detail":
         prompt = validation_rule + (
             "너는 근로기준법을 마스터한 20년 경력의 베테랑 전문 노무사야. "
@@ -159,14 +155,12 @@ async def analyze_contract(
     else:
         prompt = validation_rule + "이 근로계약서를 분석하고 주요 근로 조건을 설명해줘."
 
-    # 마임타입 확인 및 Base64 데이터 변환
     mime_type = "image/jpeg"
     if file_extension == ".png": mime_type = "image/png"
     elif file_extension == ".pdf": mime_type = "application/pdf"
 
     base64_data = base64.b64encode(file_bytes).decode("utf-8")
 
-    # 구글 Gemini REST API 명세 페이로드 조립
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     headers = {"Content-Type": "application/json"}
     
@@ -198,14 +192,16 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (유저별 저장 고도화)
 # ==========================================================
 @app.post("/chat")
-def chat_with_labor_attorney(request: ChatMessageRequest):
+def chat_with_labor_attorney(
+    request: ChatMessageRequest, 
+    user_email: str = Form(...)  # 👈 어떤 회원의 상담인지 구별하고 저장하기 위해 유저 이메일을 폼 데이터로 함께 받습니다.
+):
     if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
 
-    # 💬 상담에 특화된 AI 노무사 가상 페르소나 지시문
     chat_prompt = (
         "너는 대한민국 근로기준법을 완벽하게 숙지한 친절하고 든든한 '알바 전문 AI 노무사'야. "
         "주로 대학생이나 청소년 아르바이트생들이 억울한 일(임금체불, 부당해고, 갑질 등)을 당해 물어볼 거야. "
@@ -236,6 +232,51 @@ def chat_with_labor_attorney(request: ChatMessageRequest):
             raise HTTPException(status_code=500, detail="Gemini 대화 API 통신 에러")
             
         ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
+
+        # 💾 [데이터베이스 저장] 성공한 대화 내역을 테이블에 기록합니다.
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO chat_history (user_email, message, reply) VALUES (?, ?, ?)",
+            (user_email, request.message, ai_reply)
+        )
+        conn.commit()
+        conn.close()
+
         return {"reply": ai_reply}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
+
+# ==========================================================
+# 📊 3. 유저별 상담 내역 리스트 가져오기 엔드포인트 (신설)
+# ==========================================================
+@app.get("/chat/history")
+def get_user_chat_history(email: str):
+    if not email:
+        raise HTTPException(status_code=400, detail="이메일 정보가 빠졌습니다.")
+        
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    # 최신 상담 내역이 위로 오도록 내림차순(DESC) 정렬로 조회합니다.
+    cursor.execute(
+        "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
+        (email,)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    
+    history_list = []
+    for row in rows:
+        # 질문이 너무 길면 첫 자 기준 35자만 잘라서 한줄요약 제목으로 가공합니다.
+        summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
+        
+        # 'YYYY-MM-DD HH:MM:SS' 구조에서 'YYYY.MM.DD' 형식으로 날짜 구조를 변경합니다.
+        date_formatted = row[2].split(" ")[0].replace("-", ".")
+        
+        history_list.append({
+            "title": summary_title,
+            "reply": row[1],
+            "date": date_formatted
+        })
+        
+    return {"history": history_list}
