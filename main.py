@@ -23,7 +23,7 @@ DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 
 # 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
 # Render 대시보드의 Environment Variables(환경변수)에 GEMINI_API_KEY로 등록하시면 코드가 가장 안전해집니다.
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCyimAmgFnZ1P5Um48PhIRGq36BdDSAnso")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
 # 💾 SQLite 데이터베이스 초기화 로직
