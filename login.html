@@ -82,18 +82,36 @@
         </div>
     </main>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const user = users.find(u => u.email === email && u.password === password);
-            if (user) {
-                alert(user.name + '님, 반갑습니다! 성공적으로 로그인되었습니다.');
-                localStorage.setItem('loggedInUser', JSON.stringify(user));
-                window.location.href = 'index.html';
-            } else {
-                alert('등록되지 않은 이메일이거나 비밀번호가 틀렸습니다.');
+
+            const BACKEND_URL = 'https://albacare.onrender.com'; 
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.user.name + '님, 반갑습니다! 성공적으로 로그인되었습니다.');
+                    
+                    // 메인 페이지(index.html) 및 상단 헤더 연동을 위해 세션 정보를 localStorage에 세팅합니다.
+                    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+                    window.location.href = 'index.html';
+                } else {
+                    alert(data.detail || '이메일 또는 비밀번호가 틀렸습니다.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('백엔드 서버와 통신할 수 없습니다.');
             }
         });
     </script>
