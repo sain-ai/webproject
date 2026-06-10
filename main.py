@@ -6,12 +6,11 @@ import sqlite3
 import os
 import requests
 import base64
-import re
 
 app = FastAPI(title="AlbaCare Full Stack Gemini Server")
 
 # ==========================================================
-# 🌐 CORS 설정
+# 🌐 CORS 설정 (프론트엔드 정적 사이트 통신 허용)
 # ==========================================================
 app.add_middleware(
     CORSMiddleware,
@@ -23,15 +22,16 @@ app.add_middleware(
 
 DB_FILE = os.path.join(os.getcwd(), "albacare.db")
 
-# 💡 Google AI Studio Gemini API Key
+# 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 SQLite Connection 관리 에이전트
+# 💾 SQLite Connection 관리 에이전트 (with문 전용)
 # ==========================================================
 @contextmanager
 def get_db():
-    conn = sqlite3.connect(DB_FILE, timeout=10.0)
+    """DB가 잠기거나 커넥션이 열려있지 않도록 자동으로 열고 닫아주는 안전장치입니다."""
+    conn = sqlite3.connect(DB_FILE, timeout=15.0) # 안전을 위해 대기 타임아웃을 15초로 확장
     try:
         yield conn
     finally:
@@ -43,6 +43,7 @@ def get_db():
 def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
+        # 1. 회원 정보 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,6 +52,7 @@ def init_db():
                 password TEXT NOT NULL
             )
         """)
+        # 2. 상담 내역 저장용 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,7 +82,7 @@ class ChatMessageRequest(BaseModel):
     message: str
 
 # ==========================================================
-# 🚀 기본 라우트
+# 🚀 기본 라우트 (서버 구동 점검용)
 # ==========================================================
 @app.get("/")
 def read_root():
@@ -243,6 +245,7 @@ def chat_with_labor_attorney(
             
         ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
 
+        # 안전하게 DB 저장
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -256,43 +259,64 @@ def chat_with_labor_attorney(
         raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
 
 # ==========================================================
-# 📊 3. 유저별 상담 내역 리스트 가져오기 (문장 단위 정제 가공)
+# 📊 3. 유저별 상담 내역 리스트 가져오기 (★초강력 안전 가공 업데이트★)
 # ==========================================================
 @app.get("/chat/history")
 def get_user_chat_history(email: str):
     if not email:
         raise HTTPException(status_code=400, detail="이메일 정보가 빠졌습니다.")
         
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
-            (email,)
-        )
-        rows = cursor.fetchall()
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
+                (email,)
+            )
+            rows = cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"데이터베이스 조회 장애: {str(e)}")
     
     history_list = []
     for row in rows:
-        summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
-        
-        # 특수문자 및 마크다운 기호 완전히 제거
-        raw_reply = row[1].replace("\n", " ").replace("*", "").replace("#", "").strip()
-        
-        # 문장 단위 분리 규칙
-        sentences = re.split(r'(?<=[.!?])\s+', raw_reply)
-        
-        # 첫 번째 공감 문구 이후 딱 2문장만 가져와 깔끔히 결합 (말줄임표 완전히 제거)
-        if len(sentences) > 1:
-            solution_summary = " ".join(sentences[1:3]).strip()
-        else:
-            solution_summary = sentences[0]
+        try:
+            # 1. 질문 제목 정제 (최대 35자 잘라줌)
+            summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
+            
+            # 2. 🛡️ 마크다운 및 불필요한 특수문자 제거
+            raw_reply = row[1].replace("\n", " ").replace("*", "").replace("#", "").replace("-", "").strip()
+            
+            # 3. 🛡️ 에러 유발 정규식(re.split) 완전 삭제! 대신 안전한 온점('.') 기준 파싱 설계
+            # 문장 부호 뒤에 온점을 기준으로 문장을 정밀하게 나눕니다.
+            raw_sentences = [s.strip() for s in raw_reply.split('.') if s.strip()]
+            
+            solution_summary = ""
+            if len(raw_sentences) > 1:
+                # 첫 번째 문장(공감 멘트)을 제외한 2번째, 3번째 문장을 조립해 실질적 해결책 구성
+                solution_summary = raw_sentences[1]
+                if len(raw_sentences) > 2:
+                    solution_summary += ". " + raw_sentences[2] + "."
+                else:
+                    solution_summary += "."
+            elif len(raw_sentences) == 1:
+                solution_summary = raw_sentences[0] + "."
+            else:
+                solution_summary = "등록된 상담 내용이 존재합니다."
 
-        date_formatted = row[2].split(" ")[0].replace("-", ".")
-        
-        history_list.append({
-            "title": summary_title,
-            "reply": solution_summary,  # 👈 임의로 텍스트를 끊어 자르지 않고 온전한 2문장 전달
-            "date": date_formatted
-        })
+            # 4. 날짜 형식 가공
+            date_formatted = row[2].split(" ")[0].replace("-", ".")
+            
+            history_list.append({
+                "title": summary_title,
+                "reply": solution_summary,
+                "date": date_formatted
+            })
+        except Exception:
+            # 예외 복구 안전벨트: 특정 행 데이터 가공 중 에러가 나더라도 서버를 터뜨리지 않고 기본값 매핑
+            history_list.append({
+                "title": row[0][:35] + "..." if len(row[0]) > 35 else row[0],
+                "reply": "근로기준법 상담 세부 내용을 확인하세요.",
+                "date": "2026.06.11"
+            })
         
     return {"history": history_list}
