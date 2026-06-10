@@ -2,248 +2,79 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>알바케어 - AI 계약서 요약</title>
+    <title>알바케어 - 계약서 3줄 요약</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #f8fafc; overflow-x: hidden; }
-
-        header { 
-            display: flex; justify-content: space-between; align-items: center; padding: 0 50px; 
-            background-color: #ffffff; border-bottom: 1px solid #f0f0f0; position: fixed; 
-            width: 100%; top: 0; z-index: 1000; transition: all 0.3s ease; height: 80px;
-        }
-        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
-        .nav-menu { display: flex; height: 80px; }
-        .nav-item { position: relative; display: flex; align-items: center; margin: 0 15px; cursor: pointer; }
-        .nav-item > a { text-decoration: none; color: #4a5568; font-weight: 600; font-size: 16px; padding: 30px 5px; transition: all 0.3s ease; white-space: nowrap; }
-        .nav-item:hover > a { color: #10b981; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #f0fdf4; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 0 50px; background-color: #ffffff; border-bottom: 1px solid #edf2f7; position: fixed; width: 100%; top: 0; z-index: 1000; height: 80px; }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #059669; }
         
-        .dropdown { position: absolute; top: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; padding: 20px; min-width: 200px; z-index: 999; }
-        .nav-item:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        .simple-list { display: flex; flex-direction: column; gap: 10px; width: 180px; }
-        .simple-list a { text-decoration: none; color: #4a5568; font-size: 14px; padding: 8px; border-radius: 4px; transition: background 0.2s; white-space: nowrap; }
-        .simple-list a:hover { background-color: #f0fdf4; color: #10b981; font-weight: bold; }
-        
-        .mega-menu { width: 650px; gap: 30px; }
-        .mega-left { flex: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .mega-right { flex: 1; border-left: 1px solid #e2e8f0; padding-left: 20px; }
-        .feature-item { display: flex; align-items: flex-start; gap: 12px; text-decoration: none; color: inherit; padding: 10px; border-radius: 8px; transition: background 0.2s; }
-        .feature-item:hover { background-color: #f8fafc; }
-        .feature-icon { font-size: 24px; background: #e6fffa; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
-        .feature-text h4 { margin: 0 0 4px 0; font-size: 15px; color: #2d3748; }
-        .feature-text p { margin: 0; font-size: 12px; color: #718096; line-height: 1.4; }
+        .review-wrapper { max-width: 800px; margin: 140px auto 100px; padding: 0 20px; }
+        .title-section { text-align: center; margin-bottom: 40px; }
+        .title-section h1 { font-size: 32px; font-weight: 800; color: #065f46; margin-bottom: 10px; }
 
-        .promo-box { background-color: #1a365d; color: white; padding: 20px; border-radius: 8px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-        .promo-box h4 { margin: 0 0 10px 0; font-size: 16px; color: #68d391; font-weight: bold; line-height: 1.3; }
-        .promo-box p { font-size: 13px; margin: 0 0 15px 0; opacity: 0.9; }
-        .promo-btn { display: inline-block; background: white; color: #1a365d; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; }
+        .upload-box { background: #ffffff; border: 3px dashed #34d399; border-radius: 24px; padding: 50px 30px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { background: #e6fbf1; transform: translateY(-3px); }
+        .upload-icon { font-size: 50px; margin-bottom: 15px; }
 
-        .auth-menu { display: flex; align-items: center; white-space: nowrap; }
-        .auth-menu span { font-size: 14px; font-weight: bold; color: #1a365d; margin-right: 15px; }
-        .btn-login { text-decoration: none; color: #4a5568; font-size: 14px; font-weight: bold; margin-right: 15px; transition: color 0.3s; cursor: pointer; }
-        .btn-login:hover { color: #10b981; }
-        .btn-signup { background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 6px; transition: all 0.3s; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .btn-signup:hover { background-color: #bbf7d0; color: #1a202c; }
-
-        .page-header { padding: 140px 20px 40px; text-align: center; }
-        .upload-container { max-width: 800px; margin: 0 auto 100px; background-color: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .upload-box { display: block; border: 2px dashed #cbd5e0; border-radius: 16px; padding: 60px 20px; text-align: center; background-color: #f8fafc; cursor: pointer; transition: all 0.3s ease; width: 100%; }
-        .upload-box:hover { border-color: #10b981; background-color: #f0fdf4; }
-        
-        #fileInput { display: none; }
-        #fileNameDisplay { margin-top: 20px; font-size: 16px; font-weight: bold; color: #10b981; }
-
-        .submit-area { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
-        .btn-analyze { background-color: #1a365d; color: white; padding: 16px 40px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
-        .btn-analyze:disabled { background-color: #cbd5e0; cursor: not-allowed; }
-        .btn-reset { background-color: white; color: #e53e3e; border: 2px solid #e53e3e; padding: 16px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; display: none; }
-
-        #resultArea { margin-top: 30px; padding: 25px; border-radius: 12px; background-color: #f1f5f9; display: none; white-space: pre-wrap; line-height: 1.8; color: #334155; border-left: 5px solid #10b981; font-size: 15px; }
-
-        @media (max-width: 1250px) { header { padding: 0 20px; } .nav-item { margin: 0 8px; } .nav-item > a { font-size: 14px; padding: 30px 2px; } .logo { font-size: 20px; } .mega-menu { width: 620px; } }
+        .btn-analyze { display: block; width: 100%; padding: 16px; background-color: #059669; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .btn-analyze:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        .file-info { margin-top:20px; text-align:center; font-weight:bold; color:#059669; }
     </style>
 </head>
 <body>
-
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
-        <nav class="nav-menu">
-            <div class="nav-item">
-                <a href="about.html">서비스 소개</a>
-                <div class="dropdown">
-                    <div class="simple-list">
-                        <a href="about.html">알바케어란?</a>
-                        <a href="features.html">주요 기능 안내</a>
-                        <a href="reviews.html">이용 후기</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="nav-item">
-                <a href="#" style="color: #10b981; font-weight: bold;">AI 계약서 분석</a>
-                <div class="dropdown mega-menu">
-                    <div class="mega-left">
-                        <a href="photo_review.html" class="feature-item"><div class="feature-icon">📸</div><div class="feature-text"><h4>사진으로 검토</h4><p>스마트폰 사진을 3초 만에 분석합니다.</p></div></a>
-                        <a href="pdf_review.html" class="feature-item"><div class="feature-icon">📄</div><div class="feature-text"><h4>PDF 문서 검토</h4><p>전자 계약서 파일의 독소 조항을 찾아냅니다.</p></div></a>
-                        <a href="risk_check.html" class="feature-item"><div class="feature-icon">⚠️</div><div class="feature-text"><h4>위험 조항 체크</h4><p>최저임금 위반 여부를 계산해 드립니다.</p></div></a>
-                        <a href="summary.html" class="feature-item" style="background-color: #f8fafc;"><div class="feature-icon">✨</div><div class="feature-text"><h4>계약서 요약</h4><p>어려운 법률 용어를 쉬운 말로 요약해 드립니다.</p></div></a>
-                    </div>
-                    <div class="mega-right">
-                        <div class="promo-box">
-                            <h4>첫 달<br>무료 이벤트!</h4>
-                            <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">지금 가입하고 AI 에이전트의 꼼꼼한 검토를 받으세요.</p>
-                            <a href="payment.html" class="promo-btn">혜택 받기 👉</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="nav-item">
-                <a href="chat.html">AI법률 상담 채팅</a>
-                <div class="dropdown">
-                    <div class="simple-list">
-                        <a href="chat.html">실시간 AI 상담 시작</a>
-                        <a href="faq.html">자주 묻는 알바 질문</a>
-                        <a href="history.html">나의 상담 내역</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="nav-item">
-                <a href="#">판례·사례 검색</a>
-                <div class="dropdown">
-                    <div class="simple-list">
-                        <a href="wage_remedy.html">임금체불 구제 사례</a>
-                        <a href="unfair_dismissal_cases.html">부당해고 판례 찾기</a>
-                        <a href="labor_law_summary.html">노동법 핵심 요약집</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="nav-item">
-                <a href="#">커뮤니티</a>
-                <div class="dropdown">
-                    <div class="simple-list">
-                        <a href="community_tips.html">알바생 꿀팁 게시판</a>
-                        <a href="expert_qna.html">노무사 Q&A</a>
-                        <a href="community_counseling.html">고민 상담소</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="nav-item"><a href="support.html">고객지원</a></div>
-        </nav>
-        <div class="auth-menu">
-            <a href="login.html" class="btn-login">로그인</a>
-            <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-        </div>
+        <a href="index.html" class="logo">AlbaCare 📝</a>
     </header>
 
-    <section class="page-header">
-        <h1>계약서 핵심 요약</h1>
-        <p>복잡한 계약 조항이 한눈에 들어오지 않나요? AI가 가장 중요한 정보만 쏙 뽑아 정리해 드립니다.</p>
-    </section>
-
-    <section class="upload-container">
-        <label for="fileInput" class="upload-box">
-            <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
-            <div style="font-size: 20px; font-weight: bold; color: #2d3748;">요약할 사진이나 PDF를 이곳에 올려주세요</div>
-            <div id="fileNameDisplay"></div>
-        </label>
-        <input type="file" id="fileInput" accept="image/*, application/pdf">
-
-        <div class="submit-area">
-            <button class="btn-reset" id="resetBtn">초기화</button>
-            <button class="btn-analyze" id="analyzeBtn" disabled>✨ AI에게 계약서 요약 맡기기</button>
+    <main class="review-wrapper">
+        <div class="title-section">
+            <h1>📝 알바계약서 핵심 조건 초고속 요약</h1>
+            <p>파일을 올리면 필수 계약 정보만 3~5줄 요약 노트패드로 보기 쉽게 압축해 드립니다.</p>
         </div>
-        <div id="resultArea"></div>
-    </section>
+
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📝</div>
+            <div class="upload-text" style="color:#059669;">여기를 눌러 계약서 파일 업로드</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*, .pdf" style="display: none;">
+
+        <div id="fileInfo" class="file-info"></div>
+
+        <button class="btn-analyze" id="analyzeBtn" disabled>⚡ 계약서 핵심 3줄 요약하기</button>
+    </main>
 
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        const authMenu = document.querySelector('.auth-menu');
-
-        if (!loggedInUser) {
-            alert('로그인이 필요한 서비스입니다!');
-            location.href = 'login.html';
-        } else {
-            authMenu.innerHTML = `
-                <span>${loggedInUser.name} 회원님</span>
-                <a onclick="handleLogout()" class="btn-login">로그아웃</a>
-                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-            `;
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('loggedInUser');
-            alert('로그아웃 되었습니다.');
-            location.href = 'index.html';
-        }
-
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
-                    const isPublic = publicPages.some(page => targetHref.includes(page));
-                    if (!loggedInUser && !isPublic) {
-                        e.preventDefault();
-                        alert('로그인이 필요한 서비스입니다!');
-                        location.href = 'login.html';
-                    }
-                }
-            });
-        });
+        if (!loggedInUser) { alert('로그인이 필요한 서비스입니다.'); location.replace('login.html'); }
 
         const fileInput = document.getElementById('fileInput');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
         const analyzeBtn = document.getElementById('analyzeBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const resultArea = document.getElementById('resultArea');
 
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                fileNameDisplay.innerHTML = "✅ 선택된 파일: " + e.target.files[0].name;
+        fileInput.addEventListener('change', function() {
+            if (this.files[0]) {
+                document.getElementById('fileInfo').innerText = `📁 확인된 문서: ${this.files[0].name}`;
                 analyzeBtn.disabled = false;
-                resetBtn.style.display = "inline-block";
-                analyzeBtn.innerHTML = "✨ AI에게 계약서 요약 맡기기";
-                analyzeBtn.style.backgroundColor = "#10b981";
             }
         });
 
-        resetBtn.addEventListener('click', function() {
-            fileInput.value = "";
-            fileNameDisplay.innerHTML = "";
-            analyzeBtn.disabled = true;
-            resetBtn.style.display = "none";
-            resultArea.style.display = "none";
-            analyzeBtn.innerHTML = "✨ AI에게 계약서 요약 맡기기";
-            analyzeBtn.style.backgroundColor = "#1a365d";
-        });
-
         analyzeBtn.addEventListener('click', async function() {
-            if (!fileInput.files[0]) return;
-            analyzeBtn.innerHTML = "⏳ AI가 계약서를 꼼꼼히 읽고 있습니다...";
-            analyzeBtn.style.backgroundColor = "#3182ce";
+            analyzeBtn.innerHTML = "⏳ AI가 핵심 데이터만 골라 요약 수첩을 만드는 중입니다...";
             analyzeBtn.disabled = true;
-            resultArea.style.display = "none";
+            
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            formData.append('task_type', 'summary');
+
             try {
-                const response = await fetch('https://fast-api-server--minjun8266.replit.app/analyze', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (!response.ok) throw new Error('서버 응답 오류');
+                const response = await fetch('https://albacare.onrender.com/analyze', { method: 'POST', body: formData });
                 const data = await response.json();
-                analyzeBtn.innerHTML = "✅ 요약 완료!";
-                analyzeBtn.style.backgroundColor = "#10b981";
-                resultArea.style.display = "block";
-                resultArea.innerText = data.result;
+                
+                // 💡 요약 수첩 전용 결과창으로 데이터 토스
+                localStorage.setItem('latest_summary_result', data.result);
+                location.href = 'summary_result.html';
             } catch (error) {
-                alert("서버 연결 실패! Replit 서버가 가동 중인지 확인해 주세요.");
-                analyzeBtn.innerHTML = "✨ AI에게 계약서 요약 맡기기";
-                analyzeBtn.style.backgroundColor = "#10b981";
+                alert("통신 실패");
                 analyzeBtn.disabled = false;
             }
         });
