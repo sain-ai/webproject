@@ -102,10 +102,7 @@
         .card-text p { font-size: 14px; color: #718096; line-height: 1.5; }
 
         .card-right { text-align: right; flex-shrink: 0; }
-        .status-tag { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .status-complete { background: #e6fffa; color: #047857; }
-        .status-process { background: #ebf4ff; color: #2b6cb0; }
-        .card-date { font-size: 13px; color: #a0aec0; margin-top: 10px; }
+        .card-date { font-size: 14px; color: #a0aec0; margin-top: 0; font-weight: bold; }
 
         @media (max-width: 1100px) { header { padding: 0 20px; } .nav-item { margin: 0 8px; } .nav-item > a { font-size: 14px; } .mega-menu { width: 600px; } }
         @media (max-width: 850px) { .history-card { flex-direction: column; align-items: flex-start; gap: 20px; } .card-right { text-align: left; width: 100%; border-top: 1px solid #f1f5f9; padding-top: 15px; } .card-text h3 { font-size: 18px; } }
@@ -183,37 +180,19 @@
             <p>지금까지 알바케어와 함께 해결한 근로 고민들을 확인하세요.</p>
         </div>
 
-        <div class="history-container">
-            <a href="#" class="history-card">
-                <div class="card-left">
-                    <div class="card-icon">💻</div>
-                    <div class="card-text"><h3>AI 리걸테크 서비스 개발 상담</h3><p>알바케어 서비스의 메뉴 구성 및 사용자 인터페이스 최적화 상담</p></div>
-                </div>
-                <div class="card-right"><span class="status-tag status-complete">상담 완료</span><div class="card-date">2026.04.14</div></div>
-            </a>
-
-            <a href="#" class="history-card">
-                <div class="card-left">
-                    <div class="card-icon">🏥</div>
-                    <div class="card-text"><h3>보건증 발급 요건 및 절차 확인</h3><p>식품위생법에 따른 보건증 발급 주기 및 구직 필수 서류 상담</p></div>
-                </div>
-                <div class="card-right"><span class="status-tag status-complete">정보 확인됨</span><div class="card-date">2026.04.10</div></div>
-            </a>
-
-            <a href="#" class="history-card">
-                <div class="card-left">
-                    <div class="card-icon">⚖️</div>
-                    <div class="card-text"><h3>노동법 핵심 로직 구현 상담</h3><p>주휴수당, 최저임금 등 주요 기능 설계 및 법적 근거 상담</p></div>
-                </div>
-                <div class="card-right"><span class="status-tag status-process">검토 중</span><div class="card-date">2026.04.05</div></div>
-            </a>
+        <div class="history-container" id="historyContainer">
+            <div style="text-align:center; padding:50px; color:#718096;">상담 내역을 안전하게 불러오는 중입니다...</div>
         </div>
     </main>
 
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
+        const historyContainer = document.getElementById('historyContainer');
         
+        // 🛑 Render에 배포 완료된 본인의 실제 서비스 도메인 주소로 변경해 주세요!
+        const BACKEND_URL = "https://webproject-sain.onrender.com"; 
+
         if (!loggedInUser) {
             alert('로그인이 필요한 서비스입니다!');
             location.replace('login.html');
@@ -225,6 +204,50 @@
                     <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
                 `;
             }
+            // 유저 세션 확인 후 즉시 비동기 내역 fetch 호출
+            fetchUserChatHistory(loggedInUser.email);
+        }
+        
+        // ⚡ 데이터베이스로부터 실시간 상담 기록을 연동하는 로직
+        async function fetchUserChatHistory(email) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/chat/history?email=${encodeURIComponent(email)}`);
+                if (!response.ok) throw new Error("상담 데이터를 가져오는 데 실패했습니다.");
+                
+                const data = await response.json();
+                const history = data.history;
+                
+                if (history.length === 0) {
+                    historyContainer.innerHTML = `<div style="text-align:center; padding:50px; color:#718096;">아직 생성된 상담 내역이 존재하지 않습니다.</div>`;
+                    return;
+                }
+                
+                // 기존 스켈레톤 문구 리셋
+                historyContainer.innerHTML = "";
+                
+                // 루프 돌며 데이터 바인딩 작업 (요청하신 대로 상태 필드 삭제 및 날짜 정렬 최적화)
+                history.forEach(item => {
+                    const cardHTML = `
+                        <a href="#" class="history-card">
+                            <div class="card-left">
+                                <div class="card-icon">⚖️</div>
+                                <div class="card-text">
+                                    <h3>${item.title}</h3>
+                                    <p>${item.reply.substring(0, 75)}...</p> 
+                                </div>
+                            </div>
+                            <div class="card-right">
+                                <div class="card-date">${item.date}</div>
+                            </div>
+                        </a>
+                    `;
+                    historyContainer.insertAdjacentHTML('beforeend', cardHTML);
+                });
+                
+            } catch (error) {
+                console.error(error);
+                historyContainer.innerHTML = `<div style="text-align:center; padding:50px; color:#e53e3e;">서버 통신 오류로 인해 내역을 불러오지 못했습니다.</div>`;
+            }
         }
         
         function handleLogout() {
@@ -233,6 +256,7 @@
             location.href = 'index.html';
         }
         
+        // 비로그인 사용자 공통 페이지 접근 통제 스크립트 유지
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
