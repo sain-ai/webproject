@@ -6,9 +6,11 @@ import os
 import requests
 import base64
 
-app = FastAPI(title="AlbaCare Full Stack Server")
+app = FastAPI(title="AlbaCare Full Stack Gemini Server")
 
-# CORS 설정 (프론트엔드 통신 허용)
+# ==========================================================
+# 🌐 CORS 설정 (프론트엔드 정적 사이트 통신 허용)
+# ==========================================================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,8 +20,14 @@ app.add_middleware(
 )
 
 DB_FILE = os.path.join(os.getcwd(), "albacare.db")
+
+# 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
+# Render 대시보드의 Environment Variables(환경변수)에 GEMINI_API_KEY로 등록하시면 코드가 가장 안전해집니다.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCyimAmgFnZ1P5Um48PhIRGq36BdDSAnso")
 
+# ==========================================================
+# 💾 SQLite 데이터베이스 초기화 로직
+# ==========================================================
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -36,6 +44,9 @@ def init_db():
 
 init_db()
 
+# ==========================================================
+# 🔑 회원가입 및 로그인 데이터 모델 규격
+# ==========================================================
 class SignUpRequest(BaseModel):
     name: str
     email: EmailStr
@@ -45,10 +56,20 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+# 챗봇 상담용 전용 모델 규격
+class ChatMessageRequest(BaseModel):
+    message: str
+
+# ==========================================================
+# 🚀 기본 라우트 (서버 구동 점검용 소크)
+# ==========================================================
 @app.get("/")
 def read_root():
-    return {"status": "running", "message": "AlbaCare Gemini API Server is fully operational!"}
+    return {"status": "running", "message": "AlbaCare Gemini AI API Server is fully operational!"}
 
+# ==========================================================
+# 🔐 회원관리 엔드포인트 (기존 기능 100% 유지)
+# ==========================================================
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(user_data: SignUpRequest):
     conn = sqlite3.connect(DB_FILE)
@@ -70,19 +91,19 @@ def login(credentials: LoginRequest):
     user = cursor.fetchone()
     conn.close()
     if not user or user[2] != credentials.password:
-        raise HTTPException(status_code=status.HTTP_41_UNAUTHORIZED, detail="이메일 또는 비밀번호가 일치하지 않습니다.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이메일 또는 비밀번호가 일치하지 않습니다.")
     return {"message": "로그인 성공", "user": {"name": user[0], "email": user[1]}}
 
 
 # ==========================================================
-# 🔥 [예외 처리 강화] 계약서 이미지 & PDF 분석 API
+# 🔍 1. 계약서 이미지 & PDF 분석 API 엔드포인트
 # ==========================================================
 @app.post("/analyze")
 async def analyze_contract(
     file: UploadFile = File(...),
-    task_type: str = Form(...) # 'photo_detail', 'risk_check', 'summary'
+    task_type: str = Form(...) # 프론트엔드별 요청 분기 키 ('photo_detail', 'risk_check', 'summary')
 ):
-    # 1. 파일 확장자 검사
+    # 확장자 사전 필터링
     file_extension = os.path.splitext(file.filename)[1].lower()
     if file_extension not in ['.jpg', '.jpeg', '.png', '.pdf']:
         raise HTTPException(status_code=400, detail="지원하지 않는 파일 형식입니다. (JPG, PNG, PDF만 가능)")
@@ -90,54 +111,54 @@ async def analyze_contract(
     if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
 
-    # 2. 파일 바이트 읽기
+    # 파일 2진수 바이트 변환 읽기
     file_bytes = await file.read()
     
-    # 🛑 [공통 핵심 지시사항] 계약서가 아닌 파일 필터링 규칙 정의
+    # 🛑 [필터링 규칙] 계약서가 아닌 엉뚱한 이미지 필터링용 공통 가이드라인 선언
     validation_rule = (
-        "[경고 - 가장 중요한 규칙]\n"
-        "제공된 파일이 '근로계약서' 혹은 '고용계약서' 관련 문서가 아니거나, "
-        "화질이 너무 깨져서 글자를 전혀 판독할 수 없는 이상한 문서/사진인 경우, "
-        "아래 분석 내용을 모두 무시하고 오직 정확히 다음 한 문장만 답변으로 출력해라:\n"
+        "[경고 - 가장 중요한 절대 규칙]\n"
+        "제공된 파일이 '근로계약서' 혹은 '고용계약서'와 관련된 공식 문서가 아니거나, "
+        "화질이 너무 깨져서 글자를 판독할 수 없는 엉뚱한 사진(치킨 사진, 풍경, 영수증 등)인 경우, "
+        "아래 지시 사항들을 모두 전부 전면 무시하고 오직 정확히 다음 한 문장만 답변으로 출력해라:\n"
         "❌ 분석 불가한 파일입니다. 올바른 근로계약서 사진이나 PDF 파일을 업로드해 주세요.\n\n"
-        "만약 올바른 근로계약서가 맞다면, 아래 요청 조건에 맞추어 정상적인 분석을 진행해줘.\n"
+        "만약 정상적인 근로계약서 서류가 맞다면, 아래의 조건 유형에 따라 정밀 분석을 진행해줘.\n"
         "-------------------------------------\n"
     )
 
-    # 3. 요청 목적(task_type)에 따른 프롬프트 세팅
+    # 기능별 프롬프트 분기 가공
     if task_type == "photo_detail":
         prompt = validation_rule + (
-            "너는 대한민국 근로기준법을 완벽하게 마스터한 20년 경력의 전문 노무사야. "
-            "지금 제공하는 알바 근로계약서 첨부파일을 정밀 판독해서 아주 상세한 분석 리포트를 작성해줘. "
+            "너는 근로기준법을 마스터한 20년 경력의 베테랑 전문 노무사야. "
+            "지금 제공하는 알바 근로계약서 파일을 정밀하게 판독해서 아주 상세하고 친절한 리포트를 작성해줘. "
             "반드시 다음 사항들을 꼼꼼하게 짚어내야 해:\n"
             "1. 최저임금(2026년 기준 시급 10,300원) 준수 여부 및 주휴수당 지급 조건 명시 여부\n"
             "2. 소정근로시간, 휴게시간(4시간당 30분) 조건의 법적 타당성\n"
-            "3. 알바생에게 일방적으로 불리한 독소 조항(무단 결근 시 벌금, 수습기간 감액 남용, 무리한 위약금 설정 등)\n"
+            "3. 알바생에게 일방적으로 불리한 독소 조항(무단 결근 시 임의 벌금, 무리한 위약금 설정 등)\n"
             "4. 이 계약서에 서명해도 안전한지 최종 노무사 총평과 수정이 필요한 문구 가이드"
         )
     elif task_type == "risk_check":
         prompt = validation_rule + (
-            "너는 법적 위험 요소를 잡아내는 AI 검사기야. 이 근로계약서에서 오직 '위법 소지가 있는 위험 조항'들만 "
-            "빠르고 명확하게 리스트로 뽑아줘. 최저임금 위반, 주휴수당 미지급 조건, 불법 벌금 조항 등이 있다면 "
+            "너는 법적 위험 요소를 잡아내는 AI 위험 스캔 검사기야. 이 근로계약서에서 오직 '위법 소지가 있는 위험 조항'들만 "
+            "빠르고 보기 좋게 요약 리스트로 뽑아줘. 최저임금 위반, 주휴수당 미지급 조건, 불법 벌금 조항 등이 있다면 "
             "그 항목과 법적 근거(근로기준법 몇 조 위반인지)만 핵심 요약식으로 정리해서 알려줘."
         )
     elif task_type == "summary":
         prompt = validation_rule + (
             "너는 어려운 법률 용어를 쉬운 말로 바꿔주는 친절한 요약 요정이야. 이 근로계약서의 복잡한 내용을 다 제외하고, "
-            "알바생이 꼭 알아야 하는 핵심 요약(시급은 얼마인지, 일주일에 몇 시간 일하는지, 언제 돈 주는지 등)만 "
+            "알바생이 무조건 인지해야 하는 핵심 요약(시급은 얼마인지, 일주일에 몇 시간 일하는지, 언제 돈 주는지 등)만 "
             "가장 보기 편하게 딱 3~5줄 내외로 아주 쉽게 요약해줘."
         )
     else:
         prompt = validation_rule + "이 근로계약서를 분석하고 주요 근로 조건을 설명해줘."
 
-    # 4. 마임타입 지정 및 Base64 인코딩
+    # 마임타입 확인 및 Base64 데이터 변환
     mime_type = "image/jpeg"
     if file_extension == ".png": mime_type = "image/png"
     elif file_extension == ".pdf": mime_type = "application/pdf"
 
     base64_data = base64.b64encode(file_bytes).decode("utf-8")
 
-    # 5. Gemini API 호출
+    # 구글 Gemini REST API 명세 페이로드 조립
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     headers = {"Content-Type": "application/json"}
     
@@ -164,6 +185,49 @@ async def analyze_contract(
             
         ai_result = response_json['candidates'][0]['content']['parts'][0]['text']
         return {"result": ai_result}
-
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"서버 내부 분석 에러: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"서버 내부 문서 분석 에러: {str(e)}")
+
+
+# ==========================================================
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트
+# ==========================================================
+@app.post("/chat")
+def chat_with_labor_attorney(request: ChatMessageRequest):
+    if not GEMINI_API_KEY or "여기에_" in GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="서버에 Gemini API Key가 설정되지 않았습니다.")
+
+    # 💬 상담에 특화된 AI 노무사 가상 페르소나 지시문
+    chat_prompt = (
+        "너는 대한민국 근로기준법을 완벽하게 숙지한 친절하고 든든한 '알바 전문 AI 노무사'야. "
+        "주로 대학생이나 청소년 아르바이트생들이 억울한 일(임금체불, 부당해고, 갑질 등)을 당해 물어볼 거야. "
+        "다음 규칙을 절대적으로 지키며 친근하게 답변해줘:\n"
+        "1. 질문자가 처한 힘든 상황에 진심으로 깊이 공감해주고 달래주며 답변을 시작해라.\n"
+        "2. 관련된 근로기준법 조항(주휴수당 지급 조건, 해고예고수당 등)을 바탕으로 명확하게 불법 유무를 판단해줘.\n"
+        "3. 사장님에게 기죽지 않고 보낼 수 있는 구체적인 대처 대화 예시 문구나 고용노동부 신고 요령 등의 행동 지침을 알려줘.\n"
+        "4. 너무 딱딱하고 어려운 전문 법률 용어는 쉽게 풀어서 상냥하고 든든한 어조로 설명해라."
+    )
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+    headers = {"Content-Type": "application/json"}
+    
+    payload = {
+        "contents": [{
+            "parts": [
+                {"text": chat_prompt},
+                {"text": f"알바생의 질문 내용: {request.message}"}
+            ]
+        }]
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response_json = response.json()
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Gemini 대화 API 통신 에러")
+            
+        ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
+        return {"reply": ai_reply}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
