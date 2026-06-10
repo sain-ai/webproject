@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>알바케어 - 계약서 초고속 요약본</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #f0fdf4; padding-bottom: 60px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 0 50px; background-color: #ffffff; border-bottom: 1px solid #edf2f7; height: 80px; position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #059669; letter-spacing: -1px; }
+
+        .container { max-width: 750px; margin: 130px auto 0; padding: 0 20px; }
+        
+        /* 📝 상단 산뜻한 요약 타이틀 배너 */
+        .summary-header-box {
+            background: white; border-radius: 22px; padding: 25px 30px; margin-bottom: 25px;
+            border: 1px solid #d1fae5; box-shadow: 0 10px 25px rgba(4, 120, 87, 0.02);
+            text-align: center;
+        }
+        .summary-header-box h1 { font-size: 24px; font-weight: 800; color: #065f46; margin-bottom: 4px; }
+        .summary-header-box p { color: #059669; font-size: 14px; font-weight: 600; }
+
+        /* 📝 미니멀한 알바수첩 노트 패드 스타일 */
+        .notepad-card { 
+            background: white; border-radius: 24px; padding: 35px; 
+            border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.01);
+            position: relative;
+        }
+        /* 상단 스프링 노트 느낌의 데코 라인 */
+        .notepad-card::before {
+            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 6px;
+            background-image: radial-gradient(#cbd5e1 3px, transparent 3px); background-size: 15px 15px;
+        }
+        
+        .notepad-title { font-size: 18px; font-weight: bold; color: #065f46; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #a7f3d0; padding-bottom: 10px; }
+        
+        .summary-text-content {
+            font-size: 16px; color: #2d3748; line-height: 2; white-space: pre-wrap;
+            padding: 5px;
+        }
+
+        .btn-box { text-align: center; margin-top: 30px; }
+        .btn-back { display: inline-block; padding: 14px 35px; background-color: #059669; color: white; font-weight: bold; border-radius: 10px; text-decoration: none; transition: 0.2s; box-shadow: 0 5px 15px rgba(5, 192, 105, 0.2); }
+        .btn-back:hover { background-color: #047857; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">AlbaCare 📝</a>
+    </header>
+
+    <div class="container">
+        <!-- 상단 타이틀 -->
+        <div class="summary-header-box">
+            <h1>핵심 근로조건 요약 수첩</h1>
+            <p>복잡한 계약 조항 중 알바생이 꼭 기억해야 할 핵심 내용만 추렸습니다.</p>
+        </div>
+
+        <!-- 노트패드 결과 구역 -->
+        <div class="notepad-card">
+            <div class="notepad-title">📋 내 알바 계약 요약서</div>
+            <div class="summary-text-content" id="summaryContent">
+근로시간, 실제 수령 시급, 주휴수당 조건, 정기 임금 지급일 등 필수 정보가 복잡한 문구 없이 친절한 3~5줄 요약 형태로 이곳에 깔끔하게 도출됩니다.
+            </div>
+        </div>
+
+        <div class="btn-box">
+            <a href="index.html" class="btn-back">내용 확인 완료</a>
+        </div>
+    </div>
+
+</body>
+</html>
