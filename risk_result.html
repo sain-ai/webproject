@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>알바케어 - 위험조항 실시간 스캔 결과</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #fff5f5; padding-bottom: 60px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 0 50px; background-color: #ffffff; border-bottom: 1px solid #edf2f7; height: 80px; position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #c53030; letter-spacing: -1px; }
+
+        .container { max-width: 800px; margin: 130px auto 0; padding: 0 20px; }
+        
+        /* 🚨 위험 조항 개수 알림 레이더 판넬 */
+        .risk-summary-box {
+            background: white; border-radius: 24px; padding: 30px; margin-bottom: 25px;
+            display: flex; align-items: center; justify-content: space-between;
+            border: 2px solid #feb2b2; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.05);
+        }
+        .radar-text h1 { font-size: 24px; font-weight: 800; color: #9b2c2c; margin-bottom: 6px; }
+        .radar-text p { color: #e53e3e; font-weight: 600; font-size: 15px; }
+        
+        .risk-count-badge {
+            background-color: #e53e3e; color: white; padding: 15px 25px; border-radius: 50px;
+            font-size: 20px; font-weight: 900; box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        /* 📋 탐지된 위법 조항 리스트 카드 */
+        .risk-card { background: white; border-radius: 20px; padding: 30px; border: 1px solid #f7fafc; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .card-title { font-size: 18px; font-weight: bold; color: #2d3748; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        
+        .risk-list-content {
+            font-size: 16px; color: #2d3748; line-height: 1.9; white-space: pre-wrap;
+            background: #fffaf0; padding: 25px; border-radius: 14px; border: 1px solid #feebc8;
+        }
+
+        .btn-box { text-align: center; margin-top: 30px; }
+        .btn-back { display: inline-block; padding: 14px 30px; background-color: #c53030; color: white; font-weight: bold; border-radius: 10px; text-decoration: none; transition: 0.2s; }
+        .btn-back:hover { background-color: #9b2c2c; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">AlbaCare 🚨</a>
+    </header>
+
+    <div class="container">
+        <!-- 위험 요약 대시보드 -->
+        <div class="risk-summary-box">
+            <div class="radar-text">
+                <h1>위법 및 불리한 조항 탐지 완료</h1>
+                <p>⚠️ 서명 전 반드시 수정 및 협의가 필요한 항목입니다.</p>
+            </div>
+            <div class="risk-count-badge" id="riskCount">위험 조항 발견</div>
+        </div>
+
+        <!-- 속성 체크 결과 구역 -->
+        <div class="risk-card">
+            <div class="card-title">❌ 근로기준법 위반 의심 리스트</div>
+            <div class="risk-list-content" id="riskContent">
+AI 검사기가 적발해낸 위법 조항 리스트와 근거 법령이 여기에 명확하고 빠르게 출력됩니다.
+            </div>
+        </div>
+
+        <div class="btn-box">
+            <a href="index.html" class="btn-back">확인 완료 (메인으로)</a>
+        </div>
+    </div>
+
+</body>
+</html>
