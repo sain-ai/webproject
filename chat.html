@@ -239,7 +239,6 @@
         </div>
     </main>
 
-    <!-- 💡 로직 부분만 내 렌더 백엔드 주소로 연결하도록 완벽 교체 -->
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
@@ -289,7 +288,7 @@
             });
         });
 
-        // 5. [핵심 업그레이드] 실시간 Gemini API 백엔드 연동 챗 로직
+        // 5. 실시간 Gemini API 백엔드 연동 챗 로직
         const chatWindow = document.getElementById('chatWindow');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -311,8 +310,8 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
             
             try {
-                // 💡 내 렌더 백엔드 서버의 /chat 주소로 실시간 요청 송신
-                const response = await fetch('https://albacare.onrender.com/chat', {
+                // 💡 [수정 내용] 주소를 복합 쿼리 스트링 구조로 변경하여 백엔드 DB 연동 조건 완벽 충족
+                const response = await fetch(`https://albacare.onrender.com/chat?user_email=${encodeURIComponent(loggedInUser.email)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: message })
