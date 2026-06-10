@@ -6,11 +6,12 @@ import sqlite3
 import os
 import requests
 import base64
+import json
 
 app = FastAPI(title="AlbaCare Full Stack Gemini Server")
 
 # ==========================================================
-# 🌐 CORS 설정 (프론트엔드 정적 사이트 통신 허용)
+# 🌐 CORS 설정
 # ==========================================================
 app.add_middleware(
     CORSMiddleware,
@@ -21,16 +22,13 @@ app.add_middleware(
 )
 
 DB_FILE = os.path.join(os.getcwd(), "albacare.db")
-
-# 💡 Google AI Studio에서 발급받은 실제 Gemini API Key를 세팅하는 구역입니다.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ==========================================================
-# 💾 SQLite Connection 관리 에이전트 (with문 전용)
+# 💾 SQLite Connection 관리 에이전트
 # ==========================================================
 @contextmanager
 def get_db():
-    """DB가 잠기거나 커넥션이 열려있지 않도록 자동으로 열고 닫아주는 안전장치입니다."""
     conn = sqlite3.connect(DB_FILE, timeout=15.0)
     try:
         yield conn
@@ -38,12 +36,11 @@ def get_db():
         conn.close()
 
 # ==========================================================
-# 💾 데이터베이스 초기화 로직
+# 💾 데이터베이스 초기화 로직 (summary 칼럼 구조 보완)
 # ==========================================================
 def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
-        # 1. 회원 정보 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,13 +49,15 @@ def init_db():
                 password TEXT NOT NULL
             )
         """)
-        # 2. 상담 내역 저장용 테이블
+        
+        # 💬 요약본을 미리 저장해둘 summary 텍스트 칼럼을 새롭게 추가합니다.
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_email TEXT NOT NULL,
                 message TEXT NOT NULL,
                 reply TEXT NOT NULL,
+                summary TEXT, 
                 created_at DATETIME DEFAULT (datetime('now', 'localtime'))
             )
         """)
@@ -81,9 +80,6 @@ class LoginRequest(BaseModel):
 class ChatMessageRequest(BaseModel):
     message: str
 
-# ==========================================================
-# 🚀 기본 라우트 (서버 구동 점검용)
-# ==========================================================
 @app.get("/")
 def read_root():
     return {"status": "running", "message": "AlbaCare Gemini AI API Server is fully operational!"}
@@ -201,7 +197,7 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트
+# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (★요약본 동시 추출 적용★)
 # ==========================================================
 @app.post("/chat")
 def chat_with_labor_attorney(
@@ -214,14 +210,15 @@ def chat_with_labor_attorney(
     if not user_email:
         raise HTTPException(status_code=422, detail="user_email 파라미터가 누락되었습니다.")
 
+    # 🛠️ [사용자님 아이디어 전격 반영] 답변과 요약본을 깔끔한 JSON 양식으로 동시에 만들어달라고 강력 규제 유도
     chat_prompt = (
-        "너는 대한민국 근로기준법을 완벽하게 숙지한 친절하고 든든한 '알바 전문 AI 노무사'야. "
-        "주로 대학생이나 청소년 아르바이트생들이 억울한 일(임금체불, 부당해고, 갑질 등)을 당해 물어볼 거야. "
-        "다음 규칙을 절대적으로 지키며 친근하게 답변해줘:\n"
-        "1. 질문자가 처한 힘든 상황에 진심으로 깊이 공감해주고 달래주며 답변을 시작해라.\n"
-        "2. 관련된 근로기준법 조항(주휴수당 지급 조건, 해고예고수당 등)을 바탕으로 명확하게 불법 유무를 판단해줘.\n"
-        "3. 사장님에게 기죽지 않고 보낼 수 있는 구체적인 대처 대화 예시 문구나 고용노동부 신고 요령 등의 행동 지침을 알려줘.\n"
-        "4. 너무 딱딱하고 어려운 전문 법률 용어는 쉽게 풀어서 상냥하고 든든한 어조로 설명해라."
+        "너는 대한민국 근로기준법을 완벽하게 숙지한 '알바 전문 AI 노무사'야. "
+        "질문자가 처한 상황에 깊이 공감해주며 법적 판단과 대처 행동 지침을 친절하게 설명해줘. "
+        "단, 너의 최종 출력은 반드시 아래 명시된 구조의 순수한 JSON 객체 형식이어야만 해. 다른 말은 절대 섞지마:\n\n"
+        "{\n"
+        '  "reply": "알바생에게 전할 친절하고 상세한 주절주절 답변 원문 전체 내용 (줄바꿈 포함 자유롭게 작성)",\n'
+        '  "summary": "위 reply 내용 중 감정적 공감 멘트를 완전히 제외하고, 오직 핵심적인 법적 판단 및 해결책 요령만 골라 딱 온전한 2문장으로 요약한 텍스트 (말줄임표 금지)"\n'
+        "}"
     )
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -243,86 +240,63 @@ def chat_with_labor_attorney(
         if response.status_code != 200:
             raise HTTPException(status_code=500, detail="Gemini 대화 API 통신 에러")
             
-        ai_reply = response_json['candidates'][0]['content']['parts'][0]['text']
+        raw_text = response_json['candidates'][0]['content']['parts'][0]['text']
+        
+        # 🛡️ 마크다운 백틱(```json ... ```) 제거 안정화 가공
+        clean_json_text = raw_text.replace("```json", "").replace("```", "").strip()
+        parsed_data = json.loads(clean_json_text)
+        
+        ai_reply = parsed_data.get("reply", "답변을 불러오지 못했습니다.")
+        ai_summary = parsed_data.get("summary", "상담 세부 내용을 확인해 보세요.")
 
+        # 💾 원문 답변과 추출된 2줄 요약본을 각각 테이블에 깔끔하게 나누어 즉시 영구 저장합니다.
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO chat_history (user_email, message, reply) VALUES (?, ?, ?)",
-                (user_email, request.message, ai_reply)
+                "INSERT INTO chat_history (user_email, message, reply, summary) VALUES (?, ?, ?, ?)",
+                (user_email, request.message, ai_reply, ai_summary)
             )
             conn.commit()
 
+        # 📱 채팅 화면에는 주절주절 친절한 원본 대답만 내보냅니다!
         return {"reply": ai_reply}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"상담 서버 채널 장애: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"상담 데이터 가공 처리 장애: {str(e)}")
 
 # ==========================================================
-# 📊 3. 유저별 상담 내역 리스트 가져오기 (초강력 방어 패치)
+# 📊 3. 유저별 상담 내역 리스트 가져오기 (★초고속 원본 다이렉트 바인딩★)
 # ==========================================================
 @app.get("/chat/history")
 def get_user_chat_history(email: str):
     if not email:
         raise HTTPException(status_code=400, detail="이메일 정보가 빠졌습니다.")
         
-    try:
-        with get_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT message, reply, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
-                (email,)
-            )
-            rows = cursor.fetchall()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"데이터베이스 조회 장애: {str(e)}")
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT message, reply, summary, created_at FROM chat_history WHERE user_email = ? ORDER BY id DESC", 
+            (email,)
+        )
+        rows = cursor.fetchall()
     
     history_list = []
     for row in rows:
-        # 데이터 정제 중 어떤 에러가 발생해도 row 단위로 완벽 방어 처리합니다.
-        try:
-            # 1. 질문 제목 가공
-            summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
-            
-            # 2. 특수문자 걷어내기
-            raw_reply = row[1].replace("\n", " ").replace("*", "").replace("#", "").replace("-", "").strip()
-            
-            # 3. 온점 기준으로 깔끔하게 분리
-            raw_sentences = [s.strip() for s in raw_reply.split('.') if s.strip()]
-            
-            solution_summary = ""
-            if len(raw_sentences) > 1:
-                solution_summary = raw_sentences[1]
-                if len(raw_sentences) > 2:
-                    solution_summary += ". " + raw_sentences[2] + "."
-                else:
-                    solution_summary += "."
-            elif len(raw_sentences) == 1:
-                solution_summary = raw_sentences[0] + "."
-            else:
-                solution_summary = "상담 세부 내용을 확인하세요."
-
-            # 4. 🛠️ [통신 오류 완전 방어] 공백이든 'T' 문자이든 유연하게 처리하는 날짜 정제 로직
-            raw_date = str(row[2]).strip()
-            if " " in raw_date:
-                date_part = raw_date.split(" ")[0]
-            elif "T" in raw_date:
-                date_part = raw_date.split("T")[0]
-            else:
-                date_part = raw_date[:10]  # 앞 글자 10자리(YYYY-MM-DD) 강제 추출
-                
-            date_formatted = date_part.replace("-", ".")
-            
-            history_list.append({
-                "title": summary_title,
-                "reply": solution_summary,
-                "date": date_formatted
-            })
-        except Exception:
-            # 어떤 예측 불가능한 널(Null)값이나 데이터 꼬임이 생겨도 절대 전체 API를 죽이지 않는 안전장치
-            history_list.append({
-                "title": row[0][:35] + "..." if len(row[0]) > 35 else row[0],
-                "reply": "근로기준법에 따른 AI 노무사 답변의 요약본입니다.",
-                "date": "2026.06.11"
-            })
+        summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
+        
+        # 🛠️ 복잡하게 자를 필요 없이 저장해둔 2줄짜리 순수 해결 요약본을 다이렉트로 바로 매핑합니다!
+        # 혹시 예전에 저장되어 summary 칼럼이 비어있는(None) 데이터라면 기본 예외 문구 처리해 줍니다.
+        solution_summary = row[2] if row[2] else "상담 세부 해결 가이드를 확인하세요."
+        
+        # 날짜 정제 규칙
+        raw_date = str(row[3]).strip() if row[3] else "2026-06-11"
+        date_part = raw_date.split(" ")[0] if " " in raw_date else raw_date.split("T")[0]
+        date_formatted = date_part.replace("-", ".")
+        
+        history_list.append({
+            "title": summary_title,
+            "reply": solution_summary,
+            "date": date_formatted
+        })
         
     return {"history": history_list}
