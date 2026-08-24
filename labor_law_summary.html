@@ -2,62 +2,32 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>알바케어 - 노동법 핵심 요약집</title>
+    <title>성북굿잡 - 청년 노동법 핵심 요약집</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #f8fafc; overflow-x: hidden; }
         
-        body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            color: #1a1a2e; 
-            background: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #cbd5e1, #f8fafc);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .bg-elements {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none; overflow: hidden;
-        }
-        .floating-item {
-            position: absolute; font-weight: 900; color: #cbd5e1; opacity: 0.4; user-select: none;
-        }
-        .item-A { font-size: 280px; top: 10%; left: 2%; animation: float 8s ease-in-out infinite; }
-        .item-b { font-size: 220px; bottom: 10%; right: 2%; animation: float 10s ease-in-out infinite reverse; }
-        .item-curly { font-size: 180px; bottom: 15%; left: 10%; animation: float 12s ease-in-out infinite 1s; }
-        .item-dots { font-size: 130px; top: 15%; right: 10%; animation: float 9s ease-in-out infinite 2s; }
-
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(5deg); }
-            100% { transform: translateY(0) rotate(0deg); }
-        }
-
         header { 
             display: flex; justify-content: space-between; align-items: center; padding: 0 50px; 
-            background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #f0f0f0; position: fixed; 
-            width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); height: 80px;
+            background-color: #ffffff; border-bottom: 1px solid #f0f0f0; position: fixed; 
+            width: 100%; top: 0; z-index: 1000; height: 80px; 
         }
         .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
         .nav-menu { display: flex; height: 80px; }
         .nav-item { position: relative; display: flex; align-items: center; margin: 0 15px; cursor: pointer; }
         .nav-item > a { text-decoration: none; color: #4a5568; font-weight: 600; font-size: 16px; padding: 30px 5px; transition: all 0.3s; white-space: nowrap; }
         .nav-item:hover > a { color: #10b981; }
-
+        
         .dropdown { 
             position: absolute; top: 80px; left: 50%; transform: translateX(-50%) translateY(10px); 
-            background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); opacity: 0; visibility: hidden; 
-            transition: all 0.3s ease; display: flex; padding: 25px; z-index: 999; 
+            background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); opacity: 0; visibility: hidden; 
+            transition: all 0.3s ease; display: flex; padding: 20px; z-index: 999; 
         }
         .nav-item:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .simple-list { display: flex; flex-direction: column; gap: 10px; width: 180px; }
+        .simple-list a { text-decoration: none; color: #4a5568; font-size: 14px; padding: 8px; border-radius: 4px; transition: background 0.2s; white-space: nowrap; }
+        .simple-list a:hover { background-color: #f0fdf4; color: #10b981; font-weight: bold; }
         
         .mega-menu { width: 650px; gap: 30px; }
         .mega-left { flex: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -65,217 +35,256 @@
         .feature-item { display: flex; align-items: flex-start; gap: 12px; text-decoration: none; color: inherit; padding: 10px; border-radius: 8px; transition: background 0.2s; }
         .feature-item:hover { background-color: #f8fafc; }
         .feature-icon { font-size: 24px; background: #e6fffa; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
-        .feature-text h4 { margin: 0 0 4px 0; font-size: 15px; color: #2d3748; font-weight: bold; }
+        .feature-text h4 { margin: 0 0 4px 0; font-size: 15px; color: #2d3748; }
         .feature-text p { margin: 0; font-size: 12px; color: #718096; line-height: 1.4; }
-
-        .promo-box { background-color: #1a365d; color: white; padding: 20px; border-radius: 8px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-        .promo-box h4 { margin: 0 0 10px 0; font-size: 16px; color: #68d391; font-weight: bold; }
-        .promo-box p { font-size: 13px; margin: 0 0 15px 0; opacity: 0.9; }
+        .promo-box { background-color: #1a365d; color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .promo-box h4 { margin: 0 0 10px 0; font-size: 16px; color: #68d391; }
         .promo-btn { display: inline-block; background: white; color: #1a365d; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; }
-
-        .simple-list { display: flex; flex-direction: column; gap: 10px; width: 180px; }
-        .simple-list a { text-decoration: none; color: #4a5568; font-size: 14px; padding: 8px; border-radius: 4px; transition: background 0.2s; white-space: nowrap; }
-        .simple-list a:hover { background-color: #f0fdf4; color: #10b981; font-weight: bold; }
 
         .auth-menu { display: flex; align-items: center; white-space: nowrap; }
         .auth-menu span { font-size: 14px; font-weight: bold; color: #1a365d; margin-right: 15px; }
-        .btn-login { text-decoration: none; color: #4a5568; font-size: 14px; font-weight: bold; margin-right: 15px; transition: color 0.3s; cursor: pointer; }
+        .btn-login { text-decoration: none; color: #4a5568; font-size: 14px; font-weight: bold; margin-right: 15px; cursor: pointer; }
         .btn-login:hover { color: #10b981; }
-        .btn-signup { background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.3s; cursor: pointer; }
+        .btn-signup { background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
         .btn-signup:hover { background-color: #bbf7d0; color: #1a202c; }
 
-        .summary-wrapper { max-width: 1000px; margin: 150px auto 100px; padding: 0 20px; }
-        .summary-title { text-align: center; margin-bottom: 60px; }
-        .summary-title h1 { font-size: 36px; font-weight: 800; color: #1a1a2e; }
-        .summary-title p { color: #718096; font-size: 18px; margin-top: 15px; }
+        .page-header { padding: 160px 20px 60px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; }
+        .page-header h1 { font-size: 38px; color: #1a202c; font-weight: 800; margin-bottom: 12px; }
+        .page-header p { font-size: 17px; color: #718096; max-width: 700px; margin: 0 auto; line-height: 1.6; }
 
-        .summary-grid { display: flex; flex-direction: column; gap: 30px; }
-        .summary-card { 
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px; 
-            border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-        }
+        .container { max-width: 1100px; margin: 50px auto 100px; padding: 0 20px; }
+        .law-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .law-card { background: white; border-radius: 18px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .law-badge { align-self: flex-start; background: #e6fffa; color: #047857; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 12px; margin-bottom: 15px; }
+        .law-title { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+        .law-desc { font-size: 14px; color: #64748b; line-height: 1.65; margin-bottom: 20px; flex-grow: 1; }
         
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; }
-        .card-header .icon { font-size: 32px; }
-        .card-header h2 { font-size: 24px; color: #1a365d; font-weight: 800; }
+        .law-box { background: #f8fafc; border-left: 4px solid #10b981; padding: 15px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6; }
+        .law-box strong { color: #0f172a; }
 
-        .law-content { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .law-item h4 { font-size: 17px; color: #2d3748; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        .law-item h4::before { content: ''; display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%; }
-        .law-item p { font-size: 15px; color: #4a5568; line-height: 1.7; }
-        
-        .important-tip { margin-top: 25px; background: #fffaf0; border: 1px solid #feebc8; border-radius: 12px; padding: 20px; display: flex; gap: 15px; align-items: flex-start; }
-        .important-tip .tip-icon { font-size: 20px; }
-        .important-tip .tip-text { font-size: 14px; color: #7b341e; line-height: 1.6; }
+        .center-callout { background: #1a365d; color: white; border-radius: 18px; padding: 35px; margin-top: 50px; text-align: center; }
+        .center-callout h3 { font-size: 22px; margin-bottom: 12px; }
+        .center-callout p { font-size: 15px; opacity: 0.9; margin-bottom: 20px; line-height: 1.6; }
+        .btn-callout { display: inline-block; background: #10b981; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; }
+        .btn-callout:hover { background: #059669; }
 
-        @media (max-width: 800px) { .law-content { grid-template-columns: 1fr; } }
-        @media (max-width: 1250px) { header { padding: 0 20px; } .nav-item > a { font-size: 13px; } .mega-menu { width: 620px; } }
+        @media (max-width: 1200px) { header { padding: 0 20px; } .nav-item > a { font-size: 14px; padding: 30px 2px; } }
+        @media (max-width: 850px) { .law-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div class="bg-elements">
-        <div class="floating-item item-A">A</div>
-        <div class="floating-item item-b">b</div>
-        <div class="floating-item item-curly">{ }</div>
-        <div class="floating-item item-dots">...</div>
-    </div>
-
     <header>
-        <a href="index.html" class="logo">AlbaCare</a>
+        <a href="index.html" class="logo">Seongbuk GoodJob</a>
         <nav class="nav-menu">
             <div class="nav-item">
                 <a href="about.html">서비스 소개</a>
-                <div class="dropdown"><div class="simple-list"><a href="about.html">알바케어란?</a><a href="features.html">주요 기능 안내</a><a href="reviews.html">이용 후기</a></div></div>
+                <div class="dropdown">
+                    <div class="simple-list">
+                        <a href="about.html">성북굿잡이란?</a>
+                        <a href="features.html">AI 핵심 기능</a>
+                        <a href="reviews.html">취업 성공 후기</a>
+                    </div>
+                </div>
             </div>
-            
+
             <div class="nav-item">
-                <a href="#">AI 계약서 분석</a>
+                <a href="#">AI 일자리 분석</a>
                 <div class="dropdown mega-menu">
                     <div class="mega-left">
-                        <a href="photo_review.html" class="feature-item"><div class="feature-icon">📸</div><div class="feature-text"><h4>사진으로 검토</h4><p>스마트폰 사진 분석</p></div></a>
-                        <a href="pdf_review.html" class="feature-item"><div class="feature-icon">📄</div><div class="feature-text"><h4>PDF 문서 검토</h4><p>전자 파일 정밀 분석</p></div></a>
-                        <a href="risk_check.html" class="feature-item"><div class="feature-icon">⚠️</div><div class="feature-text"><h4>위험 조항 체크</h4><p>최저임금 위반 계산</p></div></a>
-                        <a href="summary.html" class="feature-item"><div class="feature-icon">✨</div><div class="feature-text"><h4>계약서 요약</h4><p>핵심 내용 요약 정리</p></div></a>
+                        <a href="photo_review.html" class="feature-item">
+                            <div class="feature-icon">📸</div>
+                            <div class="feature-text">
+                                <h4>자기소개서 사진 분석</h4>
+                                <p>자소서 사진으로 강점 추출 및 일자리 매칭</p>
+                            </div>
+                        </a>
+                        <a href="pdf_review.html" class="feature-item">
+                            <div class="feature-icon">📄</div>
+                            <div class="feature-text">
+                                <h4>이력서 정밀 분석</h4>
+                                <p>이력서 PDF 정밀 분석 및 직무 진단</p>
+                            </div>
+                        </a>
+                        <a href="risk_check.html" class="feature-item">
+                            <div class="feature-icon">⚠️</div>
+                            <div class="feature-text">
+                                <h4>블랙기업·허위공고 체크</h4>
+                                <p>위험 채용 조건 필터링</p>
+                            </div>
+                        </a>
+                        <a href="summary.html" class="feature-item">
+                            <div class="feature-icon">✨</div>
+                            <div class="feature-text">
+                                <h4>핵심 공고 3줄 요약</h4>
+                                <p>근무 조건 및 자격 요약</p>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-right">
                         <div class="promo-box">
-                            <h4>첫 달<br>무료 이벤트!</h4>
-                            <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">지금 가입하고 AI 에이전트의 꼼꼼한 검토를 받으세요.</p>
-                            <a href="payment.html" class="promo-btn">혜택 받기 👉</a>
+                            <h4>성북 청년 취업 특화!</h4>
+                            <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">지금 가입하고 AI 에이전트의 1:1 맞춤 취업 분석을 무료로 받아보세요.</p>
+                            <a href="payment.html" class="promo-btn">체험 시작 👉</a>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="nav-item">
-                <a href="chat.html">AI법률 상담 채팅</a>
-                <div class="dropdown"><div class="simple-list"><a href="chat.html">실시간 AI 상담 시작</a><a href="faq.html">자주 묻는 알바 질문</a><a href="history.html">나의 상담 내역</a></div></div>
+                <a href="chat.html">AI 취업 상담 챗</a>
+                <div class="dropdown">
+                    <div class="simple-list">
+                        <a href="chat.html">실시간 AI 취업 컨설팅</a>
+                        <a href="faq.html">자주 묻는 취업 질문</a>
+                        <a href="history.html">나의 상담 내역</a>
+                    </div>
+                </div>
             </div>
 
             <div class="nav-item">
-                <a href="#" style="color: #10b981; font-weight: bold;">판례·사례 검색</a>
+                <a href="#" style="color: #10b981; font-weight: bold;">성북 취업·법률 가이드</a>
                 <div class="dropdown">
                     <div class="simple-list">
-                        <a href="wage_remedy.html">임금체불 구제 사례</a>
-                        <a href="unfair_dismissal_cases.html">부당해고 판례 찾기</a>
-                        <a href="labor_law_summary.html" style="color: #10b981; font-weight: bold;">노동법 핵심 요약집</a>
+                        <a href="wage_remedy.html">임금·근로조건 구제 사례</a>
+                        <a href="unfair_dismissal_cases.html">부당채용·수습 분쟁 사례</a>
+                        <a href="labor_law_summary.html" style="color: #10b981; font-weight: bold;">청년 노동법 핵심 요약</a>
                     </div>
                 </div>
             </div>
 
             <div class="nav-item">
                 <a href="#">커뮤니티</a>
-                <div class="dropdown"><div class="simple-list"><a href="community_tips.html">알바생 꿀팁 게시판</a><a href="expert_qna.html">노무사 Q&A</a><a href="community_counseling.html">고민 상담소</a></div></div>
+                <div class="dropdown">
+                    <div class="simple-list">
+                        <a href="community_tips.html">취업·면접 합격 꿀팁</a>
+                        <a href="expert_qna.html">취업 컨설턴트 Q&A</a>
+                        <a href="community_counseling.html">취준생 고민 상담소</a>
+                    </div>
+                </div>
             </div>
 
-            <div class="nav-item"><a href="support.html">고객지원</a></div>
+            <div class="nav-item"><a href="support.html">고객센터</a></div>
         </nav>
+        
         <div class="auth-menu">
             <a href="login.html" class="btn-login">로그인</a>
             <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
         </div>
     </header>
 
-    <main class="summary-wrapper">
-        <div class="summary-title">
-            <h1>노동법 핵심 요약집</h1>
-            <p>알바생이 꼭 알아야 할 필수 근로 권익 정보를 한눈에 확인하세요.</p>
+    <section class="page-header">
+        <h1>청년 노동법 핵심 요약집</h1>
+        <p>취업 전후 청년 구직자가 반드시 알아야 할 근로계약서, 주휴수당, 수습기간, 해고보호 규정을 명쾌하게 정리했습니다.</p>
+    </section>
+
+    <div class="container">
+        <div class="law-grid">
+            <!-- 1. 근로계약서 작성 의무 -->
+            <div class="law-card">
+                <span class="law-badge">근로기준법 제17조</span>
+                <div class="law-title">1. 근로계약서 작성 및 즉시 교부</div>
+                <div class="law-desc">
+                    출근 첫날 근무 시작 전에 반드시 작성해야 하며, 사업주는 1부를 근로자에게 반드시 교부해야 합니다. 서면 미교부 시 500만 원 이하의 벌금이 부과됩니다.
+                </div>
+                <div class="law-box">
+                    <strong>💡 필수 기재 사항:</strong> 임금(시급/월급), 소정근로시간, 주휴일, 연차유급휴가, 근무 장소 및 담당 업무
+                </div>
+            </div>
+
+            <!-- 2. 주휴수당 계산법 -->
+            <div class="law-card">
+                <span class="law-badge">근로기준법 제55조</span>
+                <div class="law-title">2. 주휴수당 지급 기준 & 계산법</div>
+                <div class="law-desc">
+                    주 15시간 이상 근무하고 정해진 약정 소정근로일을 개근하면 일주일에 1일분의 유급 휴일(주휴수당)이 부여됩니다. 알바·단기직 모두 해당됩니다.
+                </div>
+                <div class="law-box">
+                    <strong>💡 계산식:</strong> (1주 총 근로시간 ÷ 40시간) × 8 × 시급
+                </div>
+            </div>
+
+            <!-- 3. 수습기간 및 감액 규정 -->
+            <div class="law-card">
+                <span class="law-badge">최저임금법 제5조</span>
+                <div class="law-title">3. 수습기간 감액 조건 & 제한</div>
+                <div class="law-desc">
+                    수습기간이라도 무조건 급여를 깎을 수 없습니다. 1년 이상의 근로계약을 맺은 경우에만 수습 3개월 이내에 최저임금의 최대 10%까지만 감액(90% 이상 지급) 가능합니다.
+                </div>
+                <div class="law-box">
+                    <strong>⚠️ 감액 금지 대상:</strong> 1년 미만 단기 계약직, 패스트푸드·편의점 등 단순노무직종
+                </div>
+            </div>
+
+            <!-- 4. 해고 예고 및 서면 통지 -->
+            <div class="law-card">
+                <span class="law-badge">근로기준법 제26조·제27조</span>
+                <div class="law-title">4. 해고 예고 및 서면 통보 의무</div>
+                <div class="law-desc">
+                    근로자를 해고하려면 최소 30일 전에 예고해야 하며, 30일 전에 예고하지 않았을 때는 30일분의 통상임금(해고예고수당)을 지급해야 합니다.
+                </div>
+                <div class="law-box">
+                    <strong>⚠️ 문자/카톡 해고 무효:</strong> 해고사유와 해고시기를 서면(종이 문서)으로 통지해야만 법적 효력이 발생합니다.
+                </div>
+            </div>
+
+            <!-- 5. 5인 이상 사업장 가산수당 -->
+            <div class="law-card">
+                <span class="law-badge">근로기준법 제56조</span>
+                <div class="law-title">5. 연장·야간·휴일근로 가산수당 (1.5배)</div>
+                <div class="law-desc">
+                    상시 근로자 5인 이상 사업장에서는 법정 근로시간(1일 8시간, 주 40시간)을 초과한 연장근로, 야간근로(22시~06시), 휴일근로에 대해 통상임금의 50% 이상을 가산 지급해야 합니다.
+                </div>
+                <div class="law-box">
+                    <strong>💡 가산율:</strong> 연장 150%, 야간 150% (연장+야간 중복 시 200%)
+                </div>
+            </div>
+
+            <!-- 6. 퇴직금 지급 기준 -->
+            <div class="law-card">
+                <span class="law-badge">근로자퇴직급여 보장법</span>
+                <div class="law-title">6. 퇴직금 발생 요건</div>
+                <div class="law-desc">
+                    주 15시간 이상, 1년 이상 계속 근로한 근로자(아르바이트, 계약직 포함)가 퇴사할 경우 30일분 이상의 평균임금을 퇴직금으로 지급해야 합니다.
+                </div>
+                <div class="law-box">
+                    <strong>💡 지급 기한:</strong> 퇴직일로부터 14일 이내 전액 지급 의무
+                </div>
+            </div>
         </div>
 
-        <div class="summary-grid">
-            <section class="summary-card">
-                <div class="card-header"><span class="icon">📜</span><h2>근로계약서 작성 및 교부</h2></div>
-                <div class="law-content">
-                    <div class="law-item">
-                        <h4>작성 시기</h4>
-                        <p>근로를 시작하기 전(단 하루를 일하더라도) 반드시 작성해야 합니다.</p>
-                    </div>
-                    <div class="law-item">
-                        <h4>교부 의무</h4>
-                        <p>작성한 계약서는 사업주와 근로자가 각각 1부씩 나누어 가져야 합니다. 위반 시 500만 원 이하의 벌금이 부과됩니다.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="summary-card">
-                <div class="card-header"><span class="icon">💰</span><h2>최저임금 및 수습기간</h2></div>
-                <div class="law-content">
-                    <div class="law-item">
-                        <h4>최저임금 준수</h4>
-                        <p>모든 사업장은 법정 최저임금 이상의 시급을 지급해야 합니다. 식비 등을 이유로 시급을 깎는 행위는 위법일 가능성이 높습니다.</p>
-                    </div>
-                    <div class="law-item">
-                        <h4>수습기간 감액</h4>
-                        <p>1년 이상 계약 시에만 수습기간(3개월) 동안 90% 지급이 가능합니다. 단순 노무직은 감액이 불가능합니다.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="summary-card">
-                <div class="card-header"><span class="icon">📅</span><h2>주휴수당 지급 조건</h2></div>
-                <div class="law-content">
-                    <div class="law-item">
-                        <h4>지급 대상</h4>
-                        <p>일주일 15시간 이상 근무하고, 약속된 근로일을 모두 출근(개근)한 경우 발생합니다.</p>
-                    </div>
-                    <div class="law-item">
-                        <h4>5인 미만 사업장</h4>
-                        <p>사업장 규모와 관계없이 주휴수당은 예외 없이 반드시 지급되어야 합니다.</p>
-                    </div>
-                </div>
-                <div class="important-tip">
-                    <span class="tip-icon">💡</span>
-                    <div class="tip-text">수습기간이라도 주 15시간 이상 근무 시 주휴수당은 100% 지급되어야 합니다.</div>
-                </div>
-            </section>
-
-            <section class="summary-card">
-                <div class="card-header"><span class="icon">⚖️</span><h2>해고 예고 및 권리</h2></div>
-                <div class="law-content">
-                    <div class="law-item">
-                        <h4>해고 예고 의무</h4>
-                        <p>사업주는 해고 30일 전에 미리 예고해야 합니다. 즉시 해고 시 30일분 이상의 통상임금을 지급해야 합니다.</p>
-                    </div>
-                    <div class="law-item">
-                        <h4>부당해고 구제</h4>
-                        <p>정당한 이유 없는 해고는 법적 구제 대상이 됩니다. 단, 5인 미만 사업장은 부당해고 구제 신청에 제한이 있을 수 있습니다.</p>
-                    </div>
-                </div>
-            </section>
+        <div class="center-callout">
+            <h3>내 근로계약서나 임금 조건에 위법 요소가 있는지 궁금한가요?</h3>
+            <p>성북굿잡 24시간 AI 취업·노동법 상담 챗에서 지금 바로 실시간으로 질문해 보세요.</p>
+            <a href="chat.html" class="btn-callout">AI 노동법 실시간 상담하기 👉</a>
         </div>
-    </main>
+    </div>
 
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
-        
-        if (!loggedInUser) {
-            alert('로그인이 필요한 서비스입니다!');
-            location.replace('login.html');
-        } else {
-            if (authMenu) {
-                authMenu.innerHTML = `
-                    <span>${loggedInUser.name} 회원님</span>
-                    <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
-                    <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
-                `;
-            }
+
+        if (loggedInUser && authMenu) {
+            authMenu.innerHTML = `
+                <span>${loggedInUser.name} 님</span>
+                <a onclick="handleLogout()" class="btn-login" style="cursor:pointer; margin-right:15px;">로그아웃</a>
+                <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
+            `;
         }
-        
+
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
             alert('로그아웃 되었습니다.');
             location.href = 'index.html';
         }
-        
+
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
                 if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:') || this.getAttribute('onclick')) return;
-                
+
                 if (!loggedInUser) {
-                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html'];
+                    const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html', 'support.html', 'faq.html', 'wage_remedy.html', 'unfair_dismissal_cases.html', 'labor_law_summary.html'];
                     const isPublic = publicPages.some(page => targetHref.includes(page));
                     if (!isPublic) {
                         e.preventDefault();
