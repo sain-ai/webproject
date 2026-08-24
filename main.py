@@ -8,7 +8,7 @@ import requests
 import base64
 import json
 
-app = FastAPI(title="AlbaCare Full Stack Gemini Server")
+app = FastAPI(title="성북굿잡 AI 맞춤 일자리 매칭 & 취업 컨설팅 서버")
 
 # ==========================================================
 # 🌐 CORS 설정
@@ -21,8 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_FILE = os.path.join(os.getcwd(), "albacare.db")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+DB_FILE = os.path.join(os.getcwd(), "seongbuk_goodjob.db")
+# 🔑 환경변수가 없더라도 기본 발급받으신 Gemini API 키로 즉시 구동되도록 설정
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6LD61hlzoiankwMkVJ-rC0KS-BOWGohX_UIyGB_A5j3kg")
 
 # ==========================================================
 # 💾 SQLite Connection 관리 에이전트
@@ -36,7 +37,7 @@ def get_db():
         conn.close()
 
 # ==========================================================
-# 💾 데이터베이스 초기화 로직 (summary 칼럼 구조 보완)
+# 💾 데이터베이스 초기화 로직
 # ==========================================================
 def init_db():
     with get_db() as conn:
@@ -50,7 +51,6 @@ def init_db():
             )
         """)
         
-        # 💬 요약본을 미리 저장해둘 summary 텍스트 칼럼을 새롭게 추가합니다.
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +82,7 @@ class ChatMessageRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"status": "running", "message": "AlbaCare Gemini AI API Server is fully operational!"}
+    return {"status": "running", "message": "성북굿잡(Seongbuk GoodJob) AI 일자리 매칭 서버가 정상 가동 중입니다!"}
 
 # ==========================================================
 # 🔐 회원관리 엔드포인트
@@ -96,7 +96,7 @@ def signup(user_data: SignUpRequest):
             conn.commit()
         except sqlite3.IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="이미 가입된 이메일입니다.")
-    return {"message": "회원가입이 완료되었습니다."}
+    return {"message": "성북굿잡 회원가입이 완료되었습니다."}
 
 @app.post("/login")
 def login(credentials: LoginRequest):
@@ -109,10 +109,10 @@ def login(credentials: LoginRequest):
     return {"message": "로그인 성공", "user": {"name": user[0], "email": user[1]}}
 
 # ==========================================================
-# 🔍 1. 계약서 이미지 & PDF 분석 API 엔드포인트
+# 🔍 1. 자기소개서 & 이력서 & 채용공고 AI 정밀 분석 API
 # ==========================================================
 @app.post("/analyze")
-async def analyze_contract(
+async def analyze_document(
     file: UploadFile = File(...),
     task_type: str = Form(...)
 ):
@@ -127,38 +127,49 @@ async def analyze_contract(
     
     validation_rule = (
         "[경고 - 가장 중요한 절대 규칙]\n"
-        "제공된 파일이 '근로계약서' 혹은 '고용계약서'와 관련된 공식 문서가 아니거나, "
-        "화질이 너무 깨져서 글자를 판독할 수 없는 엉뚱한 사진(치킨 사진, 풍경, 영수증 등)인 경우, "
-        "아래 지시 사항들을 모두 전부 전면 무시하고 오직 정확히 다음 한 문장만 답변으로 출력해라:\n"
-        "❌ 분석 불가한 파일입니다. 올바른 근로계약서 사진이나 PDF 파일을 업로드해 주세요.\n\n"
-        "만약 정상적인 근로계약서 서류가 맞다면, 아래의 조건 유형에 따라 정밀 분석을 진행해줘.\n"
+        "제공된 파일이 '자기소개서', '이력서/포트폴리오', '채용공고문', '구인구직 서류'와 관련된 문서가 아니거나, "
+        "화질이 깨져 글자를 판독할 수 없는 엉뚱한 사진(음식 사진, 풍경, 영수증 등)인 경우, "
+        "아래 지시 사항들을 모두 무시하고 오직 정확히 다음 한 문장만 답변으로 출력해라:\n"
+        "❌ 분석 불가한 파일입니다. 올바른 자기소개서 또는 이력서 사진/PDF 파일을 업로드해 주세요.\n\n"
+        "만약 정상적인 구인구직 서류가 맞다면, 아래의 요청 유형에 맞춰 정밀 분석을 진행해줘.\n"
         "-------------------------------------\n"
     )
 
+    # 1) 자기소개서 사진 분석 & 일자리 추천
     if task_type == "photo_detail":
         prompt = validation_rule + (
-            "너는 근로기준법을 마스터한 20년 경력의 베테랑 전문 노무사야. "
-            "지금 제공하는 알바 근로계약서 파일을 정밀하게 판독해서 아주 상세하고 친절한 리포트를 작성해줘. "
-            "반드시 다음 사항들을 꼼꼼하게 짚어내야 해:\n"
-            "1. 최저임금(2026년 기준 시급 10,300원) 준수 여부 및 주휴수당 지급 조건 명시 여부\n"
-            "2. 소정근로시간, 휴게시간(4시간당 30분) 조건의 법적 타당성\n"
-            "3. 알바생에게 일방적으로 불리한 독소 조항(무단 결근 시 임의 벌금, 무리한 위약금 설정 등)\n"
-            "4. 이 계약서에 서명해도 안전한지 최종 노무사 총평과 수정이 필요한 문구 가이드"
+            "너는 성북구 취업지원센터의 20년 경력 수석 취업 컨설턴트야. "
+            "지금 제공하는 자기소개서(또는 초안 사진)를 꼼꼼하게 읽고 지원자의 강점을 도출하여 성북구 맞춤 일자리를 추천해줘:\n"
+            "1. 자소서 핵심 역량(전공 지식, 프로젝트 경험, 문제 해결력 등) 3가지 추출\n"
+            "2. 지원자에게 가장 잘 어울리는 성북구 관내 추천 직무 및 기업 유형 (IT/벤처, 문화기획, 공공기관, 패션/제조 등)\n"
+            "3. 서류 합격률을 높이기 위한 자기소개서 문장 첨삭 및 보완 가이드\n"
+            "4. 지원자가 활용할 수 있는 성북구 일자리 지원센터(대학 일자리카페 등) 연계 조언"
         )
+    # 2) 이력서 PDF 정밀 분석
+    elif task_type == "resume_analyze":
+        prompt = validation_rule + (
+            "너는 인사담당자 관점에서 서류를 평가하는 취업 전문 헤드헌터야. "
+            "업로드된 이력서 및 경력기술서 문서를 정밀 분석해서 합격 진단서를 작성해줘:\n"
+            "1. 목표 직무 부합도 평가 및 핵심 경쟁력 분석\n"
+            "2. 수치화된 성과 표현 부족 등 이력서 서술 방식 개선점 피드백\n"
+            "3. 추가하면 서류 합격률이 급상승하는 필수 직무 키워드 제안\n"
+            "4. 이력서 기반 추천 채용 포지션 및 면접 대비 질문 2가지"
+        )
+    # 3) 블랙기업 & 위험 채용공고 스캔
     elif task_type == "risk_check":
         prompt = validation_rule + (
-            "너는 법적 위험 요소를 잡아내는 AI 위험 스캔 검사기야. 이 근로계약서에서 오직 '위법 소지가 있는 위험 조항'들만 "
-            "빠르고 보기 좋게 요약 리스트로 뽑아줘. 최저임금 위반, 주휴수당 미지급 조건, 불법 벌금 조항 등이 있다면 "
-            "그 항목과 법적 근거(근로기준법 몇 조 위반인지)만 핵심 요약식으로 정리해서 알려줘."
+            "너는 구인구직 사기 및 불량 채용공고를 잡아내는 AI 안전 스캐너야. 이 공고문에서 '지원자가 주의해야 할 위험 요소'만 "
+            "핵심 요약 리스트로 뽑아줘. 허위 과장 공고, 2026년 최저임금(시급 10,300원) 미달, 불명확한 수습 감액, 다단계/영업 강요 의심 조항이 있다면 "
+            "그 항목과 법적·실무적 주의사항만 명확히 정리해줘."
         )
+    # 4) 공고 핵심 3줄 요약
     elif task_type == "summary":
         prompt = validation_rule + (
-            "너는 어려운 법률 용어를 쉬운 말로 바꿔주는 친절한 요약 요정이야. 이 근로계약서의 복잡한 내용을 다 제외하고, "
-            "알바생이 무조건 인지해야 하는 핵심 요약(시급은 얼마인지, 일주일에 몇 시간 일하는지, 언제 돈 주는지 등)만 "
-            "가장 보기 편하게 딱 3~5줄 내외로 아주 쉽게 요약해줘."
+            "너는 복잡한 채용공고를 핵심만 쏙 뽑아주는 스마트 취업 요약 요정이야. 공고문의 복잡한 내용을 제외하고 "
+            "구직자가 무조건 알아야 할 핵심 5가지(담당업무, 급여, 근무지/시간, 필수자격, 마감일)만 보기 편하게 3~5줄로 쉽게 요약해줘."
         )
     else:
-        prompt = validation_rule + "이 근로계약서를 분석하고 주요 근로 조건을 설명해줘."
+        prompt = validation_rule + "이 일자리 및 채용 관련 서류를 정밀 분석하고 핵심 가이드를 제공해줘."
 
     mime_type = "image/jpeg"
     if file_extension == ".png": mime_type = "image/png"
@@ -197,10 +208,10 @@ async def analyze_contract(
 
 
 # ==========================================================
-# 💬 2. 실시간 1:1 AI 노무사 상담 채팅 엔드포인트 (★요약본 동시 추출 적용★)
+# 💬 2. 실시간 1:1 AI 취업 컨설턴트 상담 채팅 엔드포인트
 # ==========================================================
 @app.post("/chat")
-def chat_with_labor_attorney(
+def chat_with_job_advisor(
     request: ChatMessageRequest, 
     user_email: str = None
 ):
@@ -210,14 +221,13 @@ def chat_with_labor_attorney(
     if not user_email:
         raise HTTPException(status_code=422, detail="user_email 파라미터가 누락되었습니다.")
 
-    # 🛠️ [사용자님 아이디어 전격 반영] 답변과 요약본을 깔끔한 JSON 양식으로 동시에 만들어달라고 강력 규제 유도
     chat_prompt = (
-        "너는 대한민국 근로기준법을 완벽하게 숙지한 '알바 전문 AI 노무사'야. "
-        "질문자가 처한 상황에 깊이 공감해주며 법적 판단과 대처 행동 지침을 친절하게 설명해줘. "
+        "너는 성북구 청년 및 구직자를 위한 '성북굿잡 전담 AI 취업 컨설턴트'야. "
+        "성북구 내 일자리 정보, 공공 일자리, 이력서/자소서 첨삭, 면접 코칭, 청년 취업 지원 정책(성북구 청년수당, 면접정장 대여, 일자리카페 특강)을 친절하게 안내해줘. "
         "단, 너의 최종 출력은 반드시 아래 명시된 구조의 순수한 JSON 객체 형식이어야만 해. 다른 말은 절대 섞지마:\n\n"
         "{\n"
-        '  "reply": "알바생에게 전할 친절하고 상세한 주절주절 답변 원문 전체 내용 (줄바꿈 포함 자유롭게 작성)",\n'
-        '  "summary": "위 reply 내용 중 감정적 공감 멘트를 완전히 제외하고, 오직 핵심적인 법적 판단 및 해결책 요령만 골라 딱 온전한 2문장으로 요약한 텍스트 (말줄임표 금지)"\n'
+        '  "reply": "구직자에게 전할 친절하고 전문적인 상세 답변 원문 전체 내용 (줄바꿈 포함)",\n'
+        '  "summary": "위 reply 내용 중 감정적 인사를 제외하고, 오직 핵심적인 일자리 추천 및 취업 해결책만 골라 딱 온전한 2문장으로 요약한 텍스트 (말줄임표 금지)"\n'
         "}"
     )
 
@@ -228,7 +238,7 @@ def chat_with_labor_attorney(
         "contents": [{
             "parts": [
                 {"text": chat_prompt},
-                {"text": f"알바생의 질문 내용: {request.message}"}
+                {"text": f"구직자의 질문 내용: {request.message}"}
             ]
         }]
     }
@@ -241,15 +251,12 @@ def chat_with_labor_attorney(
             raise HTTPException(status_code=500, detail="Gemini 대화 API 통신 에러")
             
         raw_text = response_json['candidates'][0]['content']['parts'][0]['text']
-        
-        # 🛡️ 마크다운 백틱(```json ... ```) 제거 안정화 가공
         clean_json_text = raw_text.replace("```json", "").replace("```", "").strip()
         parsed_data = json.loads(clean_json_text)
         
         ai_reply = parsed_data.get("reply", "답변을 불러오지 못했습니다.")
         ai_summary = parsed_data.get("summary", "상담 세부 내용을 확인해 보세요.")
 
-        # 💾 원문 답변과 추출된 2줄 요약본을 각각 테이블에 깔끔하게 나누어 즉시 영구 저장합니다.
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -258,14 +265,13 @@ def chat_with_labor_attorney(
             )
             conn.commit()
 
-        # 📱 채팅 화면에는 주절주절 친절한 원본 대답만 내보냅니다!
         return {"reply": ai_reply}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"상담 데이터 가공 처리 장애: {str(e)}")
 
 # ==========================================================
-# 📊 3. 유저별 상담 내역 리스트 가져오기 (★초고속 원본 다이렉트 바인딩★)
+# 📊 3. 유저별 취업 상담 내역 리스트 가져오기
 # ==========================================================
 @app.get("/chat/history")
 def get_user_chat_history(email: str):
@@ -283,13 +289,8 @@ def get_user_chat_history(email: str):
     history_list = []
     for row in rows:
         summary_title = row[0][:35] + "..." if len(row[0]) > 35 else row[0]
-        
-        # 🛠️ 복잡하게 자를 필요 없이 저장해둔 2줄짜리 순수 해결 요약본을 다이렉트로 바로 매핑합니다!
-        # 혹시 예전에 저장되어 summary 칼럼이 비어있는(None) 데이터라면 기본 예외 문구 처리해 줍니다.
         solution_summary = row[2] if row[2] else "상담 세부 해결 가이드를 확인하세요."
-        
-        # 날짜 정제 규칙
-        raw_date = str(row[3]).strip() if row[3] else "2026-06-11"
+        raw_date = str(row[3]).strip() if row[3] else "2026-08-24"
         date_part = raw_date.split(" ")[0] if " " in raw_date else raw_date.split("T")[0]
         date_formatted = date_part.replace("-", ".")
         
