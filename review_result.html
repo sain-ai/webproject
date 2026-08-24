@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>알바케어 - AI 계약서 분석 리포트</title>
+    <title>성북굿잡 - AI 자기소개서 & 일자리 매칭 진단서</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; background-color: #f8fafc; padding-bottom: 60px; }
@@ -21,7 +21,7 @@
         .banner-text h1 { font-size: 26px; font-weight: 800; color: #1a365d; margin-bottom: 8px; }
         .banner-text p { color: #718096; font-size: 15px; }
         
-        .status-badge { padding: 20px 35px; border-radius: 20px; font-size: 22px; font-weight: 900; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .status-badge { padding: 20px 35px; border-radius: 20px; font-size: 20px; font-weight: 900; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
         .status-danger { background-color: #fff5f5; color: #e53e3e; border: 2px solid #fed7d7; }
         .status-warning { background-color: #fffaf0; color: #dd6b20; border: 2px solid #feebc8; }
         .status-safe { background-color: #f0fdf4; color: #10b981; border: 2px solid #bbf7d0; }
@@ -32,7 +32,7 @@
 
         .info-table { width: 100%; border-collapse: collapse; }
         .info-table th, .info-table td { padding: 14px 0; border-bottom: 1px solid #edf2f7; text-align: left; font-size: 15px; }
-        .info-table th { color: #718096; font-weight: 600; width: 35%; }
+        .info-table th { color: #718096; font-weight: 600; width: 38%; }
         .info-table td { color: #2d3748; font-weight: bold; }
         .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: none; }
 
@@ -51,74 +51,73 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare</a>
+        <a href="index.html" class="logo">Seongbuk GoodJob</a>
         <div class="auth-menu">
-            <span id="userName">회원님</span>
+            <span id="userName">구직자 님</span>
         </div>
     </header>
 
     <div class="container">
         <div class="summary-banner">
             <div class="banner-text">
-                <h1 id="bannerTitle">계약서 정밀 판독 결과</h1>
-                <p>대한민국 근로기준법을 바탕으로 AI 노무사가 종합 분석한 결과화면입니다.</p>
+                <h1 id="bannerTitle">AI 자기소개서 정밀 진단 & 일자리 매칭 리포트</h1>
+                <p>성북구 공공 채용 데이터와 직무 평가 기준을 바탕으로 AI 수석 취업 컨설턴트가 분석한 결과입니다.</p>
             </div>
-            <div class="status-badge status-warning" id="statusBadge">⏳ 판독중</div>
+            <div class="status-badge status-safe" id="statusBadge">🎯 매칭 완료</div>
         </div>
 
         <div class="dashboard-grid">
             <div class="card">
-                <div class="card-title">🔍 주요 조건 요약</div>
+                <div class="card-title">🔍 역량 분석 및 추천 일자리 요약</div>
                 <table class="info-table">
                     <tr>
-                        <th>체결 시급</th>
-                        <td id="infoSalary">하단 리포트 참조</td>
+                        <th>추천 직무</th>
+                        <td id="infoJob">하단 리포트 참조</td>
                     </tr>
                     <tr>
-                        <th>근로 시간</th>
-                        <td id="infoHours">하단 리포트 참조</td>
+                        <th>핵심 강점 키워드</th>
+                        <td id="infoSkills">하단 리포트 참조</td>
                     </tr>
                     <tr>
-                        <th>주휴 수당</th>
-                        <td id="infoWeeklyAllowance">하단 리포트 참조</td>
+                        <th>성북구 연계 기관</th>
+                        <td id="infoCenter">일자리 지원센터 연계</td>
                     </tr>
                     <tr>
-                        <th>휴게 시간</th>
-                        <td id="infoBreakTime">4시간당 30분 기본 준수</td>
+                        <th>서류 완성도</th>
+                        <td id="infoScore" style="color: #10b981;">우수 (보완점 가이드 제공)</td>
                     </tr>
                 </table>
             </div>
 
             <div class="card">
-                <div class="card-title">🛡️ 주요 독소조항 필터링 모니터</div>
+                <div class="card-title">💡 자소서 첨삭 & 일자리 매칭 모니터</div>
                 <div class="check-item">
-                    <div class="check-icon" id="icon1">⚠️</div>
+                    <div class="check-icon" id="icon1">🎯</div>
                     <div class="check-text">
-                        <h4 id="title1">계약서 진위 여부 검증</h4>
-                        <p id="desc1">인공지능이 서류의 형식과 불리한 독점 조항들을 필터링 중입니다.</p>
+                        <h4 id="title1">맞춤 일자리 및 직무 적합도</h4>
+                        <p id="desc1">지원자의 경험과 역량에 가장 적합한 성북구 관내 채용 분야를 탐색했습니다.</p>
                     </div>
                 </div>
                 <div class="check-item">
-                    <div class="check-icon" id="icon2">ℹ️</div>
+                    <div class="check-icon" id="icon2">✍️</div>
                     <div class="check-text">
-                        <h4 id="title2">상세 내역 점검</h4>
-                        <p id="desc2">구체적인 근로기준법 부합 여부는 하단 리포트 원문을 확인하세요.</p>
+                        <h4 id="title2">서류 합격률 상승 첨삭 코칭</h4>
+                        <p id="desc2">인사담당자의 눈길을 끄는 성과 서술 방식과 면접 전략은 하단 상세 소견서를 확인하세요.</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card detail-report">
-            <div class="card-title">⚖️ AI 노무사 정밀 분석 소견서 원문</div>
+            <div class="card-title">⚖️ AI 수석 취업 컨설턴트 정밀 매칭 소견서 원문</div>
             <div class="report-content" id="rawReport">데이터를 불러오는 중입니다...</div>
             <a href="index.html" class="btn-retry">🏠 메인으로 돌아가기</a>
         </div>
     </div>
 
-    <!-- 💡 실시간 데이터 바인딩 최종 스크립트 통합 -->
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (loggedInUser) { document.getElementById('userName').innerText = `${loggedInUser.name} 회원님`; }
+        if (loggedInUser) { document.getElementById('userName').innerText = `${loggedInUser.name} 님`; }
 
         const aiResult = localStorage.getItem('latest_ai_result');
         const rawReport = document.getElementById('rawReport');
@@ -127,35 +126,28 @@
         if (aiResult) {
             rawReport.innerText = aiResult;
             
-            // ❌ 이상한 파일 우회 필터링 차단 처리
             if (aiResult.includes("분석 불가한 파일")) {
                 rawReport.style.color = "#e53e3e";
                 statusBadge.innerText = "❌ 분석 불가";
                 statusBadge.className = "status-badge status-danger";
-                document.getElementById('infoSalary').innerText = "판독 불가";
-                document.getElementById('infoHours').innerText = "판독 불가";
+                document.getElementById('infoJob').innerText = "판독 불가";
+                document.getElementById('infoSkills').innerText = "판독 불가";
+                document.getElementById('infoScore').innerText = "서류 재확인 필요";
+                document.getElementById('infoScore').style.color = "#e53e3e";
                 document.getElementById('icon1').innerText = "❌";
                 document.getElementById('title1').innerText = "올바르지 않은 서류";
-                document.getElementById('desc1').innerText = "계약서 양식이 아니거나 화질이 너무 낮아 분석이 취소되었습니다.";
+                document.getElementById('desc1').innerText = "자기소개서/이력서 문서 양식이 아니거나 화질이 너무 낮아 분석이 취소되었습니다.";
             } else {
-                // 정상 분석 상태 스위칭 지표
-                if (aiResult.includes("위반") || aiResult.includes("불리한") || aiResult.includes("독소")) {
-                    statusBadge.innerText = "⚠️ 주의 요망";
-                    statusBadge.className = "status-badge status-danger";
-                    document.getElementById('infoSalary').style.color = "#e53e3e";
-                    document.getElementById('icon1').innerText = "❌";
-                    document.getElementById('title1').innerText = "독소조항/위법 우려 감지";
-                    document.getElementById('desc1').innerText = "계약 내용 중 알바생에게 일방적으로 불리한 문구가 포함되어 있습니다.";
-                } else {
-                    statusBadge.innerText = "✅ 안전함";
-                    statusBadge.className = "status-badge status-safe";
-                    document.getElementById('icon1').innerText = "✅";
-                    document.getElementById('title1').innerText = "표준 조항 준수 확인";
-                    document.getElementById('desc1').innerText = "근로기준법 가이드라인을 대체로 잘 준수하고 있는 계약서입니다.";
-                }
+                statusBadge.innerText = "🎯 매칭 분석 완료";
+                statusBadge.className = "status-badge status-safe";
+                document.getElementById('infoJob').innerText = "맞춤 일자리 도출";
+                document.getElementById('infoSkills').innerText = "핵심 역량 추출 완료";
+                document.getElementById('icon1').innerText = "✅";
+                document.getElementById('title1').innerText = "직무 역량 추출 완료";
+                document.getElementById('desc1').innerText = "지원자의 주요 경험을 바탕으로 성북구 관내 추천 일자리와 서류 개선점을 도출했습니다.";
             }
         } else {
-            rawReport.innerText = "분석된 리포트 내용이 존재하지 않습니다. 다시 업로드해 주세요.";
+            rawReport.innerText = "분석된 진단 리포트 내용이 존재하지 않습니다. 다시 업로드해 주세요.";
         }
     </script>
 </body>
