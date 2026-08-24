@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>성북굿잡 - 성북구 AI 맞춤 일자리 매칭 & 채용 분석 플랫폼</title>
+    <title>성북굿잡 - 성북구 AI 맞춤 일자리 매칭 & 취업지원 포털</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; overflow-x: hidden; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; overflow-x: hidden; background-color: #f8fafc; }
 
         header {
             display: flex;
@@ -70,7 +70,7 @@
         .btn-signup { background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 6px; transition: all 0.3s; text-decoration: none; font-weight: bold; font-size: 14px; }
         .btn-signup:hover { background-color: #bbf7d0; color: #1a202c; }
         
-        .hero { position: relative; text-align: center; padding: 220px 20px 150px; background-color: #ffffff; overflow: hidden; }
+        .hero { position: relative; text-align: center; padding: 200px 20px 130px; background-color: #ffffff; overflow: hidden; }
         @keyframes floatUpDown {
             0% { transform: translateY(0px); }
             100% { transform: translateY(-30px); }
@@ -82,26 +82,47 @@
         .shape4 { font-size: 300px; bottom: -50px; left: 20%; color: #f8fafc; animation-duration: 7s; }
 
         .hero-content { position: relative; z-index: 10; }
-        .hero h1 { font-size: 48px; line-height: 1.3; margin-bottom: 24px; letter-spacing: -1.5px; color: #1a202c; transition: font-size 0.3s; }
-        .hero p { font-size: 20px; color: #718096; line-height: 1.6; margin-bottom: 50px; }
+        .hero h1 { font-size: 46px; line-height: 1.35; margin-bottom: 22px; letter-spacing: -1.5px; color: #1a202c; }
+        .hero p { font-size: 19px; color: #718096; line-height: 1.6; margin-bottom: 45px; }
         .btn-group { display: flex; justify-content: center; gap: 16px; }
         .btn-primary, .btn-secondary { background-color: #2c3e50; color: white; padding: 16px 32px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 8px; transition: all 0.3s; }
         .btn-primary:hover, .btn-secondary:hover { background-color: #bbf7d0; color: #1a202c; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        .section-white { padding: 100px 20px; text-align: center; background-color: #ffffff; }
-        .sec-subtitle { color: #10b981; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-        .sec-title { font-size: 40px; font-weight: 900; color: #1a202c; margin-bottom: 50px; letter-spacing: -1px; }
-        .mockup-img { width: 100%; max-width: 900px; height: 500px; background-color: #e2e8f0; border-radius: 12px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #a0aec0; font-size: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        /* ================= 🏢 성북구 일자리 지원센터 데이터 섹션 ================= */
+        .section-centers { padding: 90px 20px; background-color: #ffffff; border-top: 1px solid #f1f5f9; }
+        .centers-container { max-width: 1200px; margin: 0 auto; }
+        .sec-subtitle { color: #10b981; font-weight: bold; font-size: 17px; margin-bottom: 10px; text-align: center; }
+        .sec-title { font-size: 36px; font-weight: 900; color: #1a202c; margin-bottom: 30px; letter-spacing: -1px; text-align: center; }
+        
+        .filter-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 35px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 22px; border-radius: 30px; border: 1px solid #cbd5e1; background: #ffffff; color: #4a5568; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.25s; }
+        .filter-btn:hover, .filter-btn.active { background-color: #10b981; color: #ffffff; border-color: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
 
-        .section-dark { padding: 100px 20px; text-align: center; background-color: #2d3748; }
+        .search-row { max-width: 500px; margin: 0 auto 40px; }
+        .search-input { width: 100%; padding: 14px 22px; border-radius: 30px; border: 2px solid #e2e8f0; font-size: 15px; outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+
+        .center-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+        .center-card { background: #ffffff; border-radius: 18px; padding: 28px; border: 1px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.03); transition: all 0.3s; display: flex; flex-direction: column; }
+        .center-card:hover { transform: translateY(-6px); border-color: #10b981; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.12); }
+        .center-tag { align-self: flex-start; padding: 4px 12px; background: #e6fffa; color: #047857; font-size: 12px; font-weight: 800; border-radius: 20px; margin-bottom: 12px; }
+        .center-name { font-size: 19px; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+        .center-desc { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 18px; flex-grow: 1; }
+        .center-info { border-top: 1px solid #f1f5f9; padding-top: 14px; font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px; }
+        .center-info span { display: flex; align-items: center; gap: 6px; }
+
+        .section-dark { padding: 90px 20px; text-align: center; background-color: #2d3748; }
         .section-dark .sec-subtitle { color: #68d391; }
         .section-dark .sec-title { color: #ffffff; }
         .card-container { display: flex; justify-content: center; gap: 30px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
-        .card { background-color: #ffffff; padding: 50px 30px; border-radius: 16px; width: 300px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.3s; }
+        .card { background-color: #ffffff; padding: 45px 30px; border-radius: 16px; width: 300px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.3s; }
         .card:hover { transform: translateY(-10px); }
-        .card-icon { font-size: 40px; margin-bottom: 20px; color: #10b981; }
-        .card h3 { font-size: 20px; color: #1a202c; margin-bottom: 15px; }
+        .card-icon { font-size: 38px; margin-bottom: 18px; color: #10b981; }
+        .card h3 { font-size: 19px; color: #1a202c; margin-bottom: 12px; }
         .card p { font-size: 14px; color: #718096; line-height: 1.6; }
+
+        .section-white { padding: 90px 20px; text-align: center; background-color: #ffffff; }
+        .mockup-img { width: 100%; max-width: 900px; height: 380px; background-color: #f1f5f9; border-radius: 16px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 18px; font-weight: bold; box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
 
         @media (max-width: 1200px) {
             header { padding: 0 20px; } 
@@ -109,9 +130,13 @@
             .nav-item { margin: 0 8px; } 
             .nav-item > a { font-size: 14px; padding: 30px 2px; } 
             .auth-menu a { font-size: 13px; margin-left: 10px; }
-            .hero h1 { font-size: 36px; } 
+            .hero h1 { font-size: 34px; } 
+            .center-grid { grid-template-columns: repeat(2, 1fr); }
             .card-container { flex-direction: column; align-items: center; } 
             .card { width: 100%; max-width: 400px; }
+        }
+        @media (max-width: 768px) {
+            .center-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -138,15 +163,15 @@
                         <a href="photo_review.html" class="feature-item">
                             <div class="feature-icon">📸</div>
                             <div class="feature-text">
-                                <h4>공고문 사진 분석</h4>
-                                <p>채용 포스터·공고 사진을 AI가 3초 만에 분석합니다.</p>
+                                <h4>자기소개서 사진 분석</h4>
+                                <p>작성한 자기소개서 사진을 올리면 AI가 맞춤 일자리를 찾아 안내합니다.</p>
                             </div>
                         </a>
                         <a href="pdf_review.html" class="feature-item">
                             <div class="feature-icon">📄</div>
                             <div class="feature-text">
-                                <h4>이력서·PDF 정밀 검토</h4>
-                                <p>내 이력서와 공고문의 직무 적합도를 정밀 진단합니다.</p>
+                                <h4>이력서 정밀 분석</h4>
+                                <p>이력서·포트폴리오 PDF를 정밀 분석하여 최적의 직무를 매칭합니다.</p>
                             </div>
                         </a>
                         <a href="risk_check.html" class="feature-item">
@@ -223,38 +248,55 @@
         <div class="bg-shape shape4">JOB</div>
 
         <div class="hero-content">
-            <h1>AI기술과 지역 채용 데이터를 결합한<br>성북구 맞춤 일자리 파트너 성북굿잡</h1>
-            <p>공고문 분석부터 이력서 진단, 블랙기업 감별, 실시간 취업 상담까지<br>AI와 함께 안전하고 스마트하게 나만의 좋은 일자리를 찾아보세요.</p>
+            <h1>AI기술과 성북구 공공 취업 데이터를 결합한<br>성북구 맞춤 일자리 파트너 성북굿잡</h1>
+            <p>자기소개서·이력서 분석부터 맞춤형 일자리 추천, 관내 지원센터 안내, 실시간 AI 취업 상담까지<br>성북굿잡과 함께 내 역량에 딱 맞는 양질의 일자리를 스마트하게 찾아보세요.</p>
             
             <div class="btn-group">
-                <a href="chat.html" class="btn-primary">AI 취업 상담 시작</a>
-                <a href="photo_review.html" class="btn-secondary">공고문 무료 분석</a>
+                <a href="chat.html" class="btn-primary">AI 취업 컨설팅 시작</a>
+                <a href="photo_review.html" class="btn-secondary">자기소개서 사진 분석</a>
             </div>
         </div>
     </section>
 
-    <section class="section-white">
-        <div class="sec-subtitle">구직과 채용의 모든 것을 한 곳에서</div>
-        <h2 class="sec-title">성북굿잡 스마트 일자리 솔루션</h2>
-        <div class="mockup-img">
-            [성북구 지역 기반 실시간 AI 일자리 매칭 대시보드]
+    <!-- 🏢 서울특별시 성북구 공식 일자리지원센터 데이터셋 연동 섹션 -->
+    <section class="section-centers">
+        <div class="centers-container">
+            <div class="sec-subtitle">성북구 공식 공공데이터 연동</div>
+            <h2 class="sec-title">성북구 일자리·창업 지원센터 안내</h2>
+            
+            <div class="filter-tabs">
+                <button class="filter-btn active" onclick="filterCenters('전체')">전체보기 (15)</button>
+                <button class="filter-btn" onclick="filterCenters('일자리카페')">청년 일자리카페</button>
+                <button class="filter-btn" onclick="filterCenters('일자리')">취업상담·알선</button>
+                <button class="filter-btn" onclick="filterCenters('창업')">창업지원센터</button>
+                <button class="filter-btn" onclick="filterCenters('청년')">청년 커뮤니티 공간</button>
+                <button class="filter-btn" onclick="filterCenters('노동권익')">노동권익센터</button>
+            </div>
+
+            <div class="search-row">
+                <input type="text" id="centerSearch" class="search-input" placeholder="센터명, 행정동, 지원내용 검색 (예: 한성대, 창업, 삼선동)..." onkeyup="handleCenterSearch()">
+            </div>
+
+            <div class="center-grid" id="centerGrid">
+                <!-- JS로 동적 렌더링 -->
+            </div>
         </div>
     </section>
 
     <section class="section-dark">
-        <div class="sec-subtitle">복잡한 채용 정보, 성북굿잡 AI로 완벽하게 분석하세요!</div>
-        <h2 class="sec-title">일자리 탐색 · 공고 분석 · 이력서 진단 · 취업 코칭까지</h2>
+        <div class="sec-subtitle">복잡한 취업 준비, 성북굿잡 AI로 완벽하게 분석하세요!</div>
+        <h2 class="sec-title">자소서 분석 · 일자리 매칭 · 이력서 정밀진단 · 취업 코칭까지</h2>
         
         <div class="card-container">
             <div class="card">
-                <div class="card-icon">🔍</div>
-                <h3>AI 공고문 정밀 분석</h3>
-                <p>사진이나 PDF 공고문을 올리면 급여, 근무조건의 법적 타당성과 독소 조항을 3초 만에 판독합니다.</p>
+                <div class="card-icon">📸</div>
+                <h3>자기소개서 사진 분석</h3>
+                <p>작성한 자기소개서 사진을 올리면 AI가 강점을 추출하고 성북구 내 적합한 맞춤 일자리를 찾아 안내합니다.</p>
             </div>
             <div class="card">
-                <div class="card-icon">✨</div>
-                <h3>Job Matching AI</h3>
-                <p>내 희망 직무와 이력서 역량을 바탕으로 성북구 관내 최적의 우수 기업 일자리를 자동 매칭합니다.</p>
+                <div class="card-icon">📄</div>
+                <h3>이력서 정밀 분석</h3>
+                <p>내 이력서와 직무 경험을 정밀 분석하여 합격률을 높이는 피드백과 연관 추천 일자리를 제공합니다.</p>
             </div>
             <div class="card">
                 <div class="card-icon">🛡️</div>
@@ -271,12 +313,187 @@
             방대한 성북구 일자리 데이터와 노동법 가이드를 기반으로 신속하고 정확한 맞춤 취업 정보를 제공합니다.<br>
             이력서 작성법, 면접 질문 대비, 청년 지원금 혜택까지 AI 취업 컨설턴트에게 물어보세요.
         </p>
-        <div class="mockup-img" style="height: 400px; background-color: #f7fafc;">
+        <div class="mockup-img">
             [AI 실시간 1:1 취업 컨설팅 대화 화면]
         </div>
     </section>
 
     <script>
+        // 📊 서울특별시 성북구_일자리지원관련센터 공공데이터셋
+        const seongbukCenters = [
+            {
+                type: "일자리",
+                name: "일자리 플러스 센터",
+                address: "서울특별시 성북구 보문로 168, 성북구청 2층",
+                dong: "삼선동",
+                phone: "02-2241-3947",
+                desc: "맞춤형 취업상담, 구인·구직 알선 및 성북구 관내 우수 구인기업 발굴 등록관리"
+            },
+            {
+                type: "창업",
+                name: "성북 벤처창업지원센터",
+                address: "서울특별시 성북구 화랑로 211",
+                dong: "장위2동",
+                phone: "02-941-6639",
+                desc: "벤처기업 및 청년 스타트업 창업 공간 무상/저렴 제공 및 전문 보육 프로그램 지원"
+            },
+            {
+                type: "창업",
+                name: "1인 창조기업 비즈니스센터",
+                address: "서울특별시 성북구 동소문로 63, 드림트리빌딩 6층",
+                dong: "성북동",
+                phone: "02-2241-3984",
+                desc: "1인 창조 산업 창업자 및 지식서비스 분야 예비 창업자 맞춤형 사무 공간 및 육성"
+            },
+            {
+                type: "창업",
+                name: "시니어 기술창업센터",
+                address: "서울특별시 성북구 화랑로 211, 성북구벤처창업지원센터 지하1층",
+                dong: "장위2동",
+                phone: "02-941-7257",
+                desc: "만 40세 이상 시니어 및 중장년 기술 경력자의 숙련된 기술 창업 전문 지원"
+            },
+            {
+                type: "소공인",
+                name: "성북구 패션봉제지원센터 (소공인특화지원센터)",
+                address: "서울특별시 성북구 돌곶이로25길 73",
+                dong: "장위2동",
+                phone: "02-919-9257",
+                desc: "봉제산업 소공인 경쟁력 제고를 위한 실무 기술 교육 제공 및 고가 봉제장비 임대지원"
+            },
+            {
+                type: "노동권익",
+                name: "성북구 노동권익센터",
+                address: "서울특별시 성북구 화랑로 211, 성북벤처창업지원센터 206호",
+                dong: "장위2동",
+                phone: "02-909-3987",
+                desc: "취약계층 근로자 및 청년 아르바이트생 무료 법률상담, 임금체불 구제 등 노동복지 프로그램"
+            },
+            {
+                type: "일자리카페",
+                name: "국민대학교 일자리카페",
+                address: "서울특별시 성북구 정릉로 77",
+                dong: "정릉3동",
+                phone: "02-910-4063",
+                desc: "미취업 청년들에게 무료 스터디룸, 취업 특강, 1:1 이력서 첨삭 등 무료 취업지원서비스 제공"
+            },
+            {
+                type: "일자리카페",
+                name: "성신여자대학교 일자리카페",
+                address: "서울특별시 성북구 보문로34다길 2",
+                dong: "동선동",
+                phone: "02-920-7140",
+                desc: "청년 구직자를 위한 직무 멘토링, AI 모의면접 체험, 맞춤형 채용공고 큐레이션 제공"
+            },
+            {
+                type: "일자리카페",
+                name: "동덕여자대학교 일자리카페",
+                address: "서울특별시 성북구 화랑로13길 60",
+                dong: "월곡2동",
+                phone: "02-940-4052",
+                desc: "취업 준비생 전용 공간, 현직자 멘토링 프로그램, 스터디룸 무료 대여 및 취업 상담"
+            },
+            {
+                type: "일자리카페",
+                name: "한성대학교 일자리카페",
+                address: "서울특별시 성북구 삼선교로16길 116",
+                dong: "삼선동",
+                phone: "02-760-5607",
+                desc: "대학일자리플러스센터 연계 청년 고용정책 안내, 이력서/자기소개서 집중 클리닉 운영"
+            },
+            {
+                type: "소공인",
+                name: "패션봉제지원센터 (보문동 공동작업장)",
+                address: "서울특별시 성북구 보문동",
+                dong: "보문동",
+                phone: "02-6956-3011",
+                desc: "지역 소공인들을 위한 특수 봉제 기기 지원 및 공동 작업 환경 인프라 제공"
+            },
+            {
+                type: "청년",
+                name: "청년살이 발전소",
+                address: "서울특별시 성북구 정릉로 23",
+                dong: "정릉3동",
+                phone: "070-4417-3500",
+                desc: "외식 및 문화콘텐츠 기반 청년 창업 인큐베이팅 및 청년 커뮤니티 활성화 공간"
+            },
+            {
+                type: "청년",
+                name: "무중력지대 성북",
+                address: "서울특별시 성북구 동소문로 86-2",
+                dong: "삼선동",
+                phone: "070-4042-2018",
+                desc: "청년들의 사회 진입을 돕고 자유로운 활동과 교류를 지원하는 성북 청년 전용 복합공간"
+            },
+            {
+                type: "청년",
+                name: "청년공간 길이음",
+                address: "서울특별시 성북구 삼양로 22",
+                dong: "길음동",
+                phone: "02-941-1939",
+                desc: "청년 예술가 및 예비 창업자 전시, 워크숍, 지역 상인 연계 일자리 프로젝트 지원"
+            },
+            {
+                type: "청년",
+                name: "성북청년공간",
+                address: "서울특별시 성북구 오패산로 16",
+                dong: "월곡2동",
+                phone: "070-4334-1939",
+                desc: "성북청년네트워크 거점 공간 및 청년 맞춤형 역량 강화 세미나, 취창업 소모임 운영"
+            }
+        ];
+
+        let currentType = "전체";
+        let currentKeyword = "";
+
+        function renderCenters() {
+            const grid = document.getElementById('centerGrid');
+            grid.innerHTML = "";
+
+            const filtered = seongbukCenters.filter(c => {
+                const matchType = (currentType === "전체") || (c.type === currentType);
+                const matchKey = c.name.toLowerCase().includes(currentKeyword.toLowerCase()) ||
+                                 c.dong.toLowerCase().includes(currentKeyword.toLowerCase()) ||
+                                 c.desc.toLowerCase().includes(currentKeyword.toLowerCase()) ||
+                                 c.address.toLowerCase().includes(currentKeyword.toLowerCase());
+                return matchType && matchKey;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8; font-size:15px;">검색 조건에 맞는 일자리 지원센터가 없습니다.</div>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'center-card';
+                card.innerHTML = `
+                    <span class="center-tag">#${c.type} · ${c.dong}</span>
+                    <div class="center-name">${c.name}</div>
+                    <div class="center-desc">${c.desc}</div>
+                    <div class="center-info">
+                        <span>📍 ${c.address}</span>
+                        <span>📞 ${c.phone}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCenters(type) {
+            currentType = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(type));
+            });
+            renderCenters();
+        }
+
+        function handleCenterSearch() {
+            currentKeyword = document.getElementById('centerSearch').value.trim();
+            renderCenters();
+        }
+
+        // 로그인 세션 관리
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         const authMenu = document.querySelector('.auth-menu');
         
@@ -311,6 +528,9 @@
                 }
             });
         });
+
+        // 초기 로드
+        renderCenters();
     </script>
 </body>
 </html>
