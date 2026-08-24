@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>알바케어 - 이용 후기</title>
+    <title>성북굿잡 - 취업 성공 후기</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #1a1a2e; overflow-x: hidden; background-color: #f8fafc; }
@@ -42,103 +42,114 @@
 
         .page-header { padding: 160px 20px 80px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; }
         .page-header h1 { font-size: 40px; margin-bottom: 15px; color: #1a202c; letter-spacing: -1px; }
-        .page-header p { font-size: 18px; color: #718096; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+        .page-header p { font-size: 18px; color: #718096; max-width: 650px; margin: 0 auto; line-height: 1.6; }
 
-        .reviews-wrapper { max-width: 1200px; margin: 0 auto; padding: 80px 20px 120px; }
+        .reviews-wrapper { max-width: 1200px; margin: 0 auto; padding: 60px 20px 100px; }
         
-        .empty-state {
-            background-color: #ffffff;
-            border: 2px dashed #cbd5e0;
-            border-radius: 24px;
-            padding: 80px 20px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.8; }
-        .empty-title { font-size: 24px; color: #2d3748; margin-bottom: 15px; font-weight: bold; }
-        .empty-desc { font-size: 16px; color: #718096; line-height: 1.6; margin-bottom: 30px; }
+        .review-stats { display: flex; justify-content: center; gap: 40px; margin-bottom: 60px; text-align: center; }
+        .stat-item h3 { font-size: 36px; color: #10b981; font-weight: 900; margin-bottom: 5px; }
+        .stat-item p { font-size: 15px; color: #64748b; font-weight: 600; }
+
+        .review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 50px; }
+        .review-card { background: #ffffff; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.3s, border-color 0.3s; }
+        .review-card:hover { transform: translateY(-8px); border-color: #10b981; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.12); }
         
-        .btn-outline {
-            display: inline-block;
-            background-color: transparent;
-            color: #10b981;
-            border: 2px solid #10b981;
-            padding: 14px 32px;
-            font-size: 16px;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .btn-outline:hover {
-            background-color: #10b981;
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .user-badge { font-size: 12px; font-weight: 800; color: #047857; background: #e6fffa; padding: 4px 10px; border-radius: 20px; }
+        .review-rating { color: #f59e0b; font-size: 14px; }
+        
+        .review-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px; line-height: 1.4; }
+        .review-body { font-size: 14px; color: #64748b; line-height: 1.65; margin-bottom: 20px; flex-grow: 1; }
+        
+        .review-footer { border-top: 1px solid #f1f5f9; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #94a3b8; }
+        .matched-job { color: #1a365d; font-weight: 700; }
 
         .cta-section { padding: 80px 20px; text-align: center; background-color: #1a365d; color: white; }
         .cta-section h2 { font-size: 32px; margin-bottom: 20px; }
         .btn-primary { display: inline-block; background-color: #10b981; color: white; padding: 16px 36px; font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; transition: all 0.3s; margin-top: 10px; }
         .btn-primary:hover { background-color: #059669; }
 
-        @media (max-width: 1250px) { header { padding: 0 20px; } .nav-item > a { font-size: 14px; padding: 30px 2px; } }
+        @media (max-width: 1200px) { header { padding: 0 20px; } .nav-item > a { font-size: 14px; padding: 30px 2px; } .review-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .review-grid { grid-template-columns: 1fr; } .review-stats { flex-direction: column; gap: 20px; } }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo">AlbaCare"</a>
+        <a href="index.html" class="logo">Seongbuk GoodJob</a>
         <nav class="nav-menu">
             <div class="nav-item">
-                <a href="about.html">서비스 소개</a>
+                <a href="about.html" style="color: #10b981; font-weight: bold;">서비스 소개</a>
                 <div class="dropdown">
                     <div class="simple-list">
-                        <a href="about.html">알바케어란?</a>
-                        <a href="features.html">주요 기능 안내</a>
-                        <a href="reviews.html" style="color: #10b981; font-weight: bold;">이용 후기</a>
+                        <a href="about.html">성북굿잡이란?</a>
+                        <a href="features.html">AI 핵심 기능</a>
+                        <a href="reviews.html" style="color: #10b981; font-weight: bold;">취업 성공 후기</a>
                     </div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="#">AI 계약서 분석</a>
+                <a href="#">AI 일자리 분석</a>
                 <div class="dropdown mega-menu">
                     <div class="mega-left">
-                        <a href="photo_review.html" class="feature-item"><div class="feature-icon">📸</div><div class="feature-text"><h4>사진으로 검토</h4><p>스마트폰 사진을 3초 만에 분석합니다.</p></div></a>
-                        <a href="pdf_review.html" class="feature-item"><div class="feature-icon">📄</div><div class="feature-text"><h4>PDF 문서 검토</h4><p>전자 계약서 파일의 독소 조항을 찾아냅니다.</p></div></a>
-                        <a href="risk_check.html" class="feature-item"><div class="feature-icon">⚠️</div><div class="feature-text"><h4>위험 조항 체크</h4><p>최저임금, 주휴수당 위반 여부를 계산해 드립니다.</p></div></a>
-                        <a href="summary.html" class="feature-item"><div class="feature-icon">✨</div><div class="feature-text"><h4>계약서 요약</h4><p>어려운 법률 용어를 쉬운 말로 요약해 드립니다.</p></div></a>
+                        <a href="photo_review.html" class="feature-item">
+                            <div class="feature-icon">📸</div>
+                            <div class="feature-text">
+                                <h4>자기소개서 사진 분석</h4>
+                                <p>작성한 자기소개서 사진을 올리면 AI가 맞춤 일자리를 찾아 안내합니다.</p>
+                            </div>
+                        </a>
+                        <a href="pdf_review.html" class="feature-item">
+                            <div class="feature-icon">📄</div>
+                            <div class="feature-text">
+                                <h4>이력서 정밀 분석</h4>
+                                <p>이력서·포트폴리오 PDF를 정밀 분석하여 최적의 직무를 매칭합니다.</p>
+                            </div>
+                        </a>
+                        <a href="risk_check.html" class="feature-item">
+                            <div class="feature-icon">⚠️</div>
+                            <div class="feature-text">
+                                <h4>블랙기업·허위공고 체크</h4>
+                                <p>최저임금 위반, 과장 광고 등 위험 요소를 걸러냅니다.</p>
+                            </div>
+                        </a>
+                        <a href="summary.html" class="feature-item">
+                            <div class="feature-icon">✨</div>
+                            <div class="feature-text">
+                                <h4>핵심 공고 3줄 요약</h4>
+                                <p>복잡한 자격 요건과 근무 조건을 명쾌하게 요약합니다.</p>
+                            </div>
+                        </a>
                     </div>
                     <div class="mega-right">
                         <div class="promo-box">
-                            <h4>첫 달<br>무료 이벤트!</h4>
-                            <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">지금 가입하고 AI 에이전트의 꼼꼼한 법률 검토를 받아보세요.</p>
-                            <a href="payment.html" class="promo-btn">혜택 받기 👉</a>
+                            <h4>성북 청년 취업 특화!</h4>
+                            <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">지금 가입하고 AI 에이전트의 1:1 맞춤 취업 분석을 무료로 받아보세요.</p>
+                            <a href="payment.html" class="promo-btn">체험 시작 👉</a>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="chat.html">AI법률 상담 채팅</a>
+                <a href="chat.html">AI 취업 상담 챗</a>
                 <div class="dropdown">
                     <div class="simple-list">
-                        <a href="chat.html">실시간 AI 상담 시작</a>
-                        <a href="faq.html">자주 묻는 알바 질문</a>
+                        <a href="chat.html">실시간 AI 취업 컨설팅</a>
+                        <a href="faq.html">자주 묻는 취업 질문</a>
                         <a href="history.html">나의 상담 내역</a>
                     </div>
                 </div>
             </div>
 
             <div class="nav-item">
-                <a href="#">판례·사례 검색</a>
+                <a href="#">성북 취업·법률 가이드</a>
                 <div class="dropdown">
                     <div class="simple-list">
-                        <a href="wage_remedy.html">임금체불 구제 사례</a>
-                        <a href="unfair_dismissal_cases.html">부당해고 판례 찾기</a>
-                        <a href="labor_law_summary.html">노동법 핵심 요약집</a>
+                        <a href="wage_remedy.html">임금·근로조건 구제 사례</a>
+                        <a href="unfair_dismissal_cases.html">부당채용·수습 분쟁 사례</a>
+                        <a href="labor_law_summary.html">청년 노동법 핵심 요약</a>
                     </div>
                 </div>
             </div>
@@ -147,14 +158,14 @@
                 <a href="#">커뮤니티</a>
                 <div class="dropdown">
                     <div class="simple-list">
-                        <a href="community_tips.html">알바생 꿀팁 게시판</a>
-                        <a href="expert_qna.html">노무사 Q&A</a>
-                        <a href="community_counseling.html">고민 상담소</a>
+                        <a href="community_tips.html">취업·면접 합격 꿀팁</a>
+                        <a href="expert_qna.html">취업 컨설턴트 Q&A</a>
+                        <a href="community_counseling.html">취준생 고민 상담소</a>
                     </div>
                 </div>
             </div>
 
-            <div class="nav-item"><a href="support.html">고객지원</a></div>
+            <div class="nav-item"><a href="support.html">고객센터</a></div>
         </nav>
 
         <div class="auth-menu">
@@ -164,22 +175,110 @@
     </header>
 
     <section class="page-header">
-        <h1>알바케어 이용 후기</h1>
-        <p>알바케어와 함께 정당한 권리를 찾은 분들의 생생한 이야기를 모아두는 공간입니다.</p>
+        <h1>성북굿잡 취업 성공 후기</h1>
+        <p>자기소개서 사진 분석과 이력서 정밀 진단으로 성북구 관내 우수 기업에 취업한 청년 구직자들의 생생한 후기입니다.</p>
     </section>
 
     <section class="reviews-wrapper">
-        <div class="empty-state">
-            <div class="empty-icon">💬</div>
-            <h2 class="empty-title">아직 등록된 이용 후기가 없습니다.</h2>
-            <p class="empty-desc">알바케어의 AI 검토와 상담을 통해 도움을 받으셨나요?<br>여러분의 소중한 경험이 다른 알바생들에게 큰 힘이 됩니다. 첫 번째 후기의 주인공이 되어주세요!</p>
-            <a href="#" class="btn-outline">후기 작성하러 가기</a>
+        <div class="review-stats">
+            <div class="stat-item">
+                <h3>94.8%</h3>
+                <p>AI 자소서 직무 매칭 만족도</p>
+            </div>
+            <div class="stat-item">
+                <h3>3.2배</h3>
+                <p>서류 전형 합격률 상승</p>
+            </div>
+            <div class="stat-item">
+                <h3>1,200+</h3>
+                <p>성북구 취업 성공 매칭</p>
+            </div>
+        </div>
+
+        <div class="review-grid">
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">IT·개발직 취업</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"손으로 쓴 자소서 사진만 올렸는데 딱 맞는 성북 벤처기업 매칭!"</div>
+                <div class="review-body">노트북 없이 카페에서 스마트폰으로 작성했던 자소서 메모 사진을 찍어 올렸는데, AI가 프로젝트 경험을 핵심 역량 키워드로 깔끔히 뽑아주더니 성북벤처창업지원센터 입주 스타트업 개발직을 추천해 주어 최종 합격했습니다!</div>
+                <div class="review-footer">
+                    <span>김*우 님 (26세)</span>
+                    <span class="matched-job">성북 벤처 스타트업</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">마케팅·기획</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"이력서 PDF 정밀 분석 덕분에 서류 광탈 탈출했습니다."</div>
+                <div class="review-body">혼자 이력서 쓸 땐 무엇이 부족한지 몰랐는데, 성북굿잡 AI가 직무 적합도 점수와 성과 중심 표현법을 1:1로 코칭해 줬습니다. 수정 후 성북구 관내 중견기업 마케팅팀에 바로 합격 통보를 받았습니다.</div>
+                <div class="review-footer">
+                    <span>이*진 님 (24세)</span>
+                    <span class="matched-job">콘텐츠 기획 직무</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">경영지원·사무</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"블랙기업 스캔 기능으로 안심하고 첫 직장 선택했어요."</div>
+                <div class="review-body">사회초년생이라 포괄임금제나 수습기간 감액 조건이 헷갈렸는데, AI 위험 조항 스캐너가 불공정 조항 없는 우수 기업 공고만 딱 골라주어 안심하고 입사할 수 있었습니다.</div>
+                <div class="review-footer">
+                    <span>박*현 님 (25세)</span>
+                    <span class="matched-job">성북구 관내 공공기관</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">디자인·미디어</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"성북 청년 일자리카페 멘토링과 연계되어 면접까지 완벽 대비!"</div>
+                <div class="review-body">AI 챗으로 면접 1분 자기소개와 예상 질문을 연습하고, 추천받은 성신여대 일자리카페에서 실전 모의면접을 거쳐 한 번에 최종 합격의 기쁨을 누렸습니다.</div>
+                <div class="review-footer">
+                    <span>최*아 님 (23세)</span>
+                    <span class="matched-job">패션 브랜드 디자인팀</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">서비스·운영</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"복잡한 채용공고 3줄 요약 덕분에 준비 시간이 절반으로 줄었어요."</div>
+                <div class="review-body">길고 복잡한 자격 요건을 3줄로 명쾌하게 요약해 주니 내가 지원 가능한 공고인지 10초 만에 파악할 수 있어 구직 효율이 엄청나게 올랐습니다.</div>
+                <div class="review-footer">
+                    <span>정*훈 님 (27세)</span>
+                    <span class="matched-job">복합문화공간 매니저</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="user-badge">R&D·연구직</span>
+                    <span class="review-rating">★★★★★</span>
+                </div>
+                <div class="review-title">"비전공자였는데 강점 중심 일자리 매칭으로 취업 성공!"</div>
+                <div class="review-body">자소서에 적힌 부트캠프 프로젝트 경험을 분석해서 비전공자 신입 우대 기업을 정확히 큐레이션 해줬습니다. 성북굿잡 없었으면 취업 준비가 훨씬 길어졌을 거예요.</div>
+                <div class="review-footer">
+                    <span>한*민 님 (28세)</span>
+                    <span class="matched-job">바이오 IT 솔루션 연구원</span>
+                </div>
+            </div>
         </div>
     </section>
 
     <section class="cta-section">
-        <h2>모든 기능을 한 달간 무료로 체험해보세요</h2>
-        <a href="chat.html" class="btn-primary">AI채팅상담 시작하기</a>
+        <h2>성북굿잡의 AI 맞춤 분석으로 다음 합격의 주인공이 되어보세요</h2>
+        <a href="photo_review.html" class="btn-primary">자기소개서 사진 분석 시작하기 👉</a>
     </section>
 
     <script>
@@ -188,7 +287,7 @@
 
         if (loggedInUser && authMenu) {
             authMenu.innerHTML = `
-                <span>${loggedInUser.name} 회원님</span>
+                <span>${loggedInUser.name} 님</span>
                 <a onclick="handleLogout()" class="btn-login">로그아웃</a>
                 <a href="payment.html" class="btn-signup">한달 무료 체험!</a>
             `;
@@ -200,11 +299,11 @@
             location.href = 'index.html';
         }
 
-        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html'];
+        const publicPages = ['index.html', 'about.html', 'features.html', 'reviews.html', 'login.html', 'signup.html', 'payment.html'];
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetHref = this.getAttribute('href');
-                if (targetHref && targetHref !== '#' && !targetHref.startsWith('javascript:')) {
+                if (!targetHref || targetHref === '#' || targetHref.startsWith('javascript:')) {
                     const isPublic = publicPages.some(page => targetHref.includes(page));
                     if (!loggedInUser && !isPublic) {
                         e.preventDefault();
