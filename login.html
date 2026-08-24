@@ -2,9 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>알바케어 - 로그인</title>
+    <title>성북굿잡 - 로그인</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
             color: #1a1a2e; 
@@ -12,108 +13,220 @@
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
-            overflow: hidden;
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .bg-elements { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        .floating-item { position: absolute; font-weight: 900; color: #cbd5e1; opacity: 0.4; user-select: none; }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-elements {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none; overflow: hidden;
+        }
+        .floating-item {
+            position: absolute; font-weight: 900; color: #cbd5e1; opacity: 0.4; user-select: none;
+        }
         .item-A { font-size: 280px; top: 10%; left: 2%; animation: float 8s ease-in-out infinite; }
         .item-b { font-size: 220px; bottom: 10%; right: 2%; animation: float 10s ease-in-out infinite reverse; }
-        @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(5deg); } 100% { transform: translateY(0) rotate(0deg); } }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
         header { 
             display: flex; justify-content: space-between; align-items: center; padding: 0 50px; 
-            background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #f0f0f0; position: fixed; 
-            width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); height: 80px;
+            background-color: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #f0f0f0; 
+            height: 80px; backdrop-filter: blur(10px);
         }
         .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: #1a1a2e; letter-spacing: -1px; }
-        .auth-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding-top: 80px; }
-        .auth-card { 
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); 
-            padding: 50px; border-radius: 24px; width: 100%; max-width: 450px;
-            border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+
+        .login-wrapper {
+            max-width: 440px;
+            width: 100%;
+            margin: 60px auto 80px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        }
+
+        .login-title {
             text-align: center;
+            margin-bottom: 30px;
         }
-        .auth-card h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #1a1a2e; }
-        .auth-card p { color: #718096; margin-bottom: 35px; }
-        .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #4a5568; }
-        .input-group input { 
-            width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; 
-            font-size: 16px; outline: none; transition: 0.3s;
+        .login-title h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a365d;
+            margin-bottom: 8px;
         }
-        .input-group input:focus { border-color: #10b981; background: white; }
-        .btn-auth { 
-            width: 100%; padding: 16px; background: #1a365d; color: white; border: none; 
-            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+        .login-title p {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+            background: white;
+            font-family: inherit;
+        }
+        .form-control:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
             margin-top: 10px;
         }
-        .btn-auth:hover { background: #2c5282; transform: translateY(-2px); }
-        .auth-footer { margin-top: 25px; font-size: 14px; color: #718096; }
-        .auth-footer a { color: #10b981; text-decoration: none; font-weight: bold; }
+        .btn-submit:hover {
+            background-color: #2c5282;
+        }
+
+        .form-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 14px;
+            color: #718096;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .form-footer a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: #a0aec0;
+        }
     </style>
 </head>
 <body>
+
     <div class="bg-elements">
-        <div class="floating-item item-A">A</div>
-        <div class="floating-item item-b">b</div>
+        <div class="floating-item item-A">G</div>
+        <div class="floating-item item-b">J</div>
     </div>
+
     <header>
-        <a href="index.html" class="logo">AlbaCare</a>
+        <a href="index.html" class="logo">Seongbuk GoodJob</a>
+        <a href="index.html" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">🏠 홈으로</a>
     </header>
-    <main class="auth-wrapper">
-        <div class="auth-card">
-            <h1>환영합니다!</h1>
-            <p>로그인하여 알바케어 서비스를 이용하세요.</p>
-            <form id="loginForm">
-                <div class="input-group">
-                    <label>이메일 주소</label>
-                    <input type="email" id="email" placeholder="example@email.com" required>
+
+    <main>
+        <div class="login-wrapper">
+            <div class="login-title">
+                <h2>성북굿잡 로그인</h2>
+                <p>AI 맞춤 일자리 분석과 1:1 취업 컨설팅을 시작하세요.</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">이메일 계정</label>
+                    <input type="email" id="email" class="form-control" placeholder="example@email.com" required>
                 </div>
-                <div class="input-group">
-                    <label>비밀번호</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" class="form-control" placeholder="비밀번호를 입력하세요" required>
                 </div>
-                <button type="submit" class="btn-auth">로그인</button>
+
+                <button type="submit" class="btn-submit" id="loginBtn">로그인</button>
             </form>
-            <div class="auth-footer">
-                아직 계정이 없으신가요? <a href="signup.html">회원가입</a>
+
+            <div class="form-footer">
+                <span>아직 계정이 없으신가요?</span>
+                <a href="signup.html">회원가입 👉</a>
             </div>
         </div>
     </main>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
 
-            const BACKEND_URL = 'https://albacare.onrender.com'; 
+    <footer>
+        &copy; 2026 Seongbuk GoodJob. All rights reserved.
+    </footer>
+
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000' 
+            : 'https://albacare.onrender.com';
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginBtn.disabled = true;
+            loginBtn.innerText = "로그인 중...";
 
             try {
                 const response = await fetch(`${BACKEND_URL}/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
                 });
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    alert(data.user.name + '님, 반갑습니다! 성공적으로 로그인되었습니다.');
-                    
-                    // 메인 페이지(index.html) 및 상단 헤더 연동을 위해 세션 정보를 localStorage에 세팅합니다.
-                    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
-                    window.location.href = 'index.html';
-                } else {
-                    alert(data.detail || '이메일 또는 비밀번호가 틀렸습니다.');
+                if (!response.ok) {
+                    throw new Error(data.detail || '로그인에 실패했습니다.');
                 }
+
+                // 로그인 성공 시 세션 저장
+                localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+                alert(`환영합니다, ${data.user.name} 님!`);
+                location.href = 'index.html';
+
             } catch (error) {
-                console.error(error);
-                alert('백엔드 서버와 통신할 수 없습니다.');
+                alert(error.message);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerText = "로그인";
             }
-        });
+        }
     </script>
 </body>
 </html>
